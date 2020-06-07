@@ -1,0 +1,30 @@
+{
+  "name": "yatbl",
+  "version": "0.1.0",
+  "description": "Yet Another Telegram Bot Library Core",
+  "main": "./src/index.js",
+  "scripts": {
+    "npm-publish": "git stash --include-untracked && npm publish && git stash apply",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Enkel-Digital/yatbl.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "library",
+    "api",
+    "wrapper"
+  ],
+  "author": "JJ",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Enkel-Digital/yatbl/issues"
+  },
+  "homepage": "https://github.com/Enkel-Digital/yatbl#readme"
+}
