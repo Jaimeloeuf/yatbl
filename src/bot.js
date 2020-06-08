@@ -41,6 +41,9 @@ class Bot {
   asyncUpdateCounter = 0;
 
   constructor(BOT_TOKEN) {
+    if (!BOT_TOKEN || BOT_TOKEN === "")
+      throw new Error("Bot token required for Bot constructor");
+
     // Create base API url with the bot's token and create tapi function with it
     this.tapi = tapiFF(`https://api.telegram.org/bot${BOT_TOKEN}/`);
   }

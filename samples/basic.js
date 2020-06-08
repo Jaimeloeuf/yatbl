@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const Bot = require("../src/bot");
 const bot = new Bot(process.env.BOT_TOKEN);
 

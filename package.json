@@ -31,5 +31,8 @@
   "bugs": {
     "url": "https://github.com/Enkel-Digital/yatbl/issues"
   },
-  "homepage": "https://github.com/Enkel-Digital/yatbl#readme"
+  "homepage": "https://github.com/Enkel-Digital/yatbl#readme",
+  "devDependencies": {
+    "dotenv": "^8.2.0"
+  }
 }
