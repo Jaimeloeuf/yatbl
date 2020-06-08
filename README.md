@@ -6,13 +6,13 @@
 
 
 ## Introduction
-Building telegram bots should be fun simple and easy, which is what all libraries advertise. Which is true, until, you start to build more complex bots. Too often, the bot library/framework gets in your way either because it is too opinionated or just have too many design restrictions.  
+Building telegram bots should be fun simple and easy, which is what all libraries advertise. Which is true... until, you start to build more complex bots. Too often, the bot library/framework gets in your way either because it is too opinionated or just have too many design restrictions. Libraries should help you achieve your goals and if you feel like you are fighting your library too often, this might be the change that you are looking for.  
 
 The aim of this library is just to be a thin wrapper around the actualy telegram API so that you can go FAST and BIG without needing to setup the bare basics.  
 
 This library provides 3 types of functionalities:
 1. A super simple wrapper around the telegram API exposed to you so that you can focus on building your applications and logic the way you want it to be, and have full control over communications with telegram servers.
-2. Optional, shorthand methods that can be imported seperately and attached to core service to simplify some basic operations like "reply_to_message".
+2. Optional, shorthand methods that can be imported seperately and attached to core service to provide some basic operations like "reply_to_message", if you dont want to always deal with the raw update object and "tapi" method
 3. A open API for you to create custom shorthands as plugins for you to use throughout your bot.
 
 
@@ -29,13 +29,14 @@ This library provides 3 types of functionalities:
 
 
 ## Using this library
-- Refer to the sample code in [./samples]
+- Refer to the sample codes [here](./samples)
 
 
 ## Additional technical details
 - Callback functions for new updates have a custom "this" binded to them for you to access shorthand methods, and to pass data along to the next update handler by binding data onto "this"
     - IF you would like to access the injected "this", all update handler callback functions must be declared with the "function" keyword and cannot be arrow functions for proper this binding.
     - You can add properties to "this" to access it in the next handler callback in the stack using a middleware pattern to handler updates
+- Add try/catch blocks into your own handlers, if there are any uncaught errors, all other update handlers will not run for the current update.
 - Writing your own shorthand methods
     - Short hand functions must always always return an object, as they will be "spread" using es6 spread syntax to merge all the shorthand functions into 1 "this" object to bind to the user.
     - The other reason it needs to be an object is because we want to keep the key of the shorthand the same.
@@ -44,6 +45,7 @@ This library provides 3 types of functionalities:
 
 
 ## Development
+- Note that this library is still under development and is not stable for production.
 - This library uses common JS for modules
 
 
