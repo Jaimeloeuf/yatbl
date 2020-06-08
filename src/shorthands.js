@@ -13,39 +13,46 @@ function defaultShortHands(update, tapi) {
         ...extra,
       });
     },
-    get isCommand() {
-      return update.message.entities.map((entity) =>
-        entity.type === "bot_command"
-          ? update.message.text.slice(
-              entity.offset + 1, // +1 to ensure removal of "/"
-              entity.offset + entity.length
-            )
-          : undefined
-      );
-    },
+
     /**
-     * Return the type of message/update received
-     * This is a getter method, so use it as this.message.text or smth
-     * basically user can define many handlers to deal with diff message formats
+     * Short hand for checking if a command was sent and get the list of commands sent
+     * Uses ternary operators to gaurd against non message type updates
+     *
+     * @todo treats everything behind the command as arguments for that command
+     */
+    get commands() {
+      return update.message
+        ? update.message.entities
+          ? update.message.entities
+              .map((entity) =>
+                entity.type === "bot_command"
+                  ? update.message.text.slice(
+                      entity.offset + 1, // +1 to ensure removal of "/"
+                      entity.offset + entity.length
+                    )
+                  : undefined
+              )
+              .filter((entity) => entity !== undefined)
+          : []
+        : [];
+    },
+
+    /**
+     * This is a getter method, so use it like "this.message.text"
+     * Get the message/update received in a nicer manner allowing you to do simpler checks
+     * @example
+     * // to only allow a update handler to run if update contains an image
+     * if (!this.message.photo) return;
+     *
+     * @todo add command and left+enter chat
      */
     get message() {
-      //   if (update.message.text) return update.message.text;
-      //   if (update.message.sticker) return update.message.sticker;
       return {
-        //   add command
-        // add left+enter chat
         text: update.message.text,
         photo: update.message.photo,
         video: update.message.video,
         sticker: update.message.sticker,
       };
-    },
-    /**
-     * Return the type of message/update received
-     */
-    typeOf() {
-      if (update.message.text) return "text";
-      if (update.message.sticker) return "sticker";
     },
   };
 }
