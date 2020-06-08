@@ -42,6 +42,13 @@ This library provides 3 types of functionalities:
     - The other reason it needs to be an object is because we want to keep the key of the shorthand the same.
     - You can attach anything you like as a shorthand method, from custom data fields, to methods that wrap over the telegram API
     - Short hand creation methods recieve "update" object (exact update object from telegram API servers like [this](https://core.telegram.org/bots/api#update)) and "tapi" (same instance as the one the bot uses) to create your shorthand methods.
+    - Shorthand generator methods should be asynchronous and they should also not be blocking
+        - This is because update handlers are only called after all shorthand methods have been generated
+- Update handlers can be asynchronous, but are not recommended to
+    - This is because update handlers are awaited for and called one after the other
+    - So if one of the handlers take really long to complete, the overall response will take extra long. Thus it is recommended to keep your update handlers as synchronous functions that call async methods without any awaits and let them complete in the background.
+        - An example would be responding to a message using "tapi", where tapi is async.
+        - The update handler should be synchronous and call tapi without awaiting for it, letting tapi run off in the background.
 
 
 ## Development

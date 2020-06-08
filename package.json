@@ -11,7 +11,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "node-fetch": "^2.6.0"
+    "body-parser": "^1.19.0",
+    "node-fetch": "^2.6.0",
+    "polkadot": "^1.0.0"
   },
   "repository": {
     "type": "git",
