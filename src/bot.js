@@ -1,15 +1,19 @@
 const tapiFF = require("./tapiFF");
 
-// @todo Add a try/catch when calling all the handlers to allow a individual handler to error out. Should other handlers still be ran? Ran with an error binded to "this"
-async function _onUpdate() {
-  // Call telegram update API with update offset
-  const update = await this.tapi("getUpdates", { offset: ++this.update_id });
+const sleep = async (timeout) =>
+  new Promise((resolve) => setTimeout(resolve, timeout));
 
-  // If no updates, end the function
-  if (!update.result.length) return;
-
-  // Update this.update_id when there is one and use the latest update_id from update response
-  this.update_id = update.result[update.result.length - 1].update_id;
+/**
+ * _onUpdate handler whose job is to call all the user's update handler callback functions
+ * this is used by both webhook and polling
+ * @param {object} update Update object from telegram https://core.telegram.org/bots/api#update
+ *
+ *
+ * @todo Add a try/catch when calling all the handlers to allow a individual handler to error out. Should other handlers still be ran? Ran with an error binded to "this"?
+ */
+async function _onUpdate(update) {
+  // On telegram API failure
+  if (!update.ok) return this.errorHandler(update);
 
   // Loop through every single update
   for (const result of update.result) {
@@ -28,8 +32,9 @@ async function _onUpdate() {
  */
 class Bot {
   tapi;
+  errorHandler = console.error; // Default error handler is just error logging
   handlers = []; // On update handler functions
-  update_id = 0; // Set update_id to start at 0 and use snake case to match tel API response
+  update_id = 0; // Set update_id (used for polling) to start at 0 and use snake case to match tel API response
   _pollingLoop; // Interval ID from setInterval when polling
   _shortHands = []; // shortHand method generators
 
@@ -38,6 +43,14 @@ class Bot {
   constructor(BOT_TOKEN) {
     // Create base API url with the bot's token and create tapi function with it
     this.tapi = tapiFF(`https://api.telegram.org/bot${BOT_TOKEN}/`);
+  }
+
+  /**
+   * Function to allow you to register a custom error handler
+   * @param {*} errorHandler Error handler called with error object on error from telegram API
+   */
+  registerErrorHandler(errorHandler) {
+    this.errorHandler = errorHandler;
   }
 
   /**
@@ -72,8 +85,18 @@ class Bot {
     clearInterval(this._pollingLoop);
   }
 
-  setWebhook() {
-    // @todo
+  /**
+   * @todo url should follow the standard by telegram API to use the bot token, but allow user to override using options
+   *
+   * @param {*} port
+   * @param {*} options
+   */
+  setWebhook(port, options = {}) {
+    this.stopPolling();
+    this.tapi("setWebhook", {
+      url,
+      ...options,
+    });
   }
 
   /**
