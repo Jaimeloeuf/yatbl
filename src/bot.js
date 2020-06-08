@@ -6,24 +6,23 @@ const sleep = async (timeout) =>
 /**
  * _onUpdate handler whose job is to call all the user's update handler callback functions
  * this is used by both webhook and polling
- * @param {object} update Update object from telegram https://core.telegram.org/bots/api#update
+ * @param {object} updates Array of Update objects from telegram https://core.telegram.org/bots/api#update
  *
  *
  * @todo Add a try/catch when calling all the handlers to allow a individual handler to error out. Should other handlers still be ran? Ran with an error binded to "this"?
  */
-async function _onUpdate(update) {
-  // On telegram API failure
-  if (!update.ok) return this.errorHandler(update);
-
+async function _onUpdate(updates) {
   // Loop through every single update
-  for (const result of update.result) {
+  for (const update of updates) {
     // Context object binded to "this" in the handlers
+    // Call every shorthand creation method with the update object and tapi
     const ctx = this._shortHands
-      .map((shortHand) => shortHand(result, this.tapi))
+      .map((shortHand) => shortHand(update, this.tapi))
       .reduce((acc, shortHand) => Object.assign(acc, shortHand), {});
 
-    // Loop through all the this.handlers and call them 1 by 1 with shared ctx object and result
-    for (const handler of this.handlers) await handler.call(ctx, result);
+    // Loop through these handlers with shared ctx object binded to "this" and update as the arguement
+    // Using forEach ensures every handler is called 1 by 1, without blocking the loop through every single update
+    this.handlers.forEach(async (handler) => await handler.call(ctx, update));
   }
 }
 
@@ -32,10 +31,10 @@ async function _onUpdate(update) {
  */
 class Bot {
   tapi;
-  errorHandler = console.error; // Default error handler is just error logging
+  apiErrorHandler = console.error; // Default error handler is just error logging
   handlers = []; // On update handler functions
   update_id = 0; // Set update_id (used for polling) to start at 0 and use snake case to match tel API response
-  _pollingLoop; // Interval ID from setInterval when polling
+  _continueLooping = false; // Bool to determine if looping should continue
   _shortHands = []; // shortHand method generators
 
   asyncUpdateCounter = 0;
@@ -50,25 +49,50 @@ class Bot {
 
   /**
    * Function to allow you to register a custom error handler
-   * @param {*} errorHandler Error handler called with error object on error from telegram API
+   * @param {*} apiErrorHandler Error handler called with error object on error from telegram API
    */
-  registerErrorHandler(errorHandler) {
-    this.errorHandler = errorHandler;
+  registerApiErrorHandler(apiErrorHandler) {
+    this.apiErrorHandler = apiErrorHandler;
   }
 
   /**
    * Start polling
-   * @param {number} [pollingInterval=1000] Interval in Milliseconds to poll for updates
+   * @param {number} [pollingInterval=200] Interval in Milliseconds to poll for updates where interval is the minimum time between each call to the telegram API
+   *
+   * @notice Even if pollingInterval is set to something really small, it will not poll telegram API every single millisecond or whatever, because pollingInterval is the time between EACH call to the API
+   * @notice Which means that you can pass in 0 as the interval to poll without any interval or delay between the getUpdates
    */
-  startPolling(pollingInterval = 1000) {
-    // Run it once first before the setInterval starts
-    _onUpdate.call(this);
+  async startPolling(pollingInterval = 200) {
+    // Set continue looping flag
+    this._continueLooping = true;
 
-    // Start polling using setInterval and save interval ID onto object
-    this._pollingLoop = setInterval(
-      async () => await _onUpdate.call(this),
-      pollingInterval
-    );
+    // Function to poll the telegram API for updates
+    // Arrow function to keep "this" binding
+    const polling = async () => {
+      const update = await this.tapi("getUpdates", {
+        offset: ++this.update_id,
+      });
+
+      // On telegram API failure
+      if (!update.ok) return this.apiErrorHandler(update);
+
+      // If no updates, end this function
+      if (!update.result || !update.result.length) return;
+
+      // Update this.update_id when there is one and use the latest update_id from update response
+      this.update_id = update.result[update.result.length - 1].update_id;
+
+      _onUpdate.call(this, update.result);
+    };
+
+    // Mimics setInterval, but only looping again after the current loop is completed
+    while (this._continueLooping) {
+      // Call this first to ensure it starts the first poll on startPolling and not after the first interval
+      await polling();
+
+      // @todo introduce back pressure control by increasing polling interval
+      if (pollingInterval) await sleep(pollingInterval); // Only sleep/timeout/delay if a pollingInterval is specified
+    }
   }
 
   /**
@@ -85,7 +109,7 @@ class Bot {
    * Stop polling
    */
   stopPolling() {
-    clearInterval(this._pollingLoop);
+    this._continueLooping = false;
   }
 
   /**

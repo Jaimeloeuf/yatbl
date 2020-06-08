@@ -3,6 +3,7 @@
 - Simple
 - Intuitive
 - Fast
+- Extensible
 
 
 ## Introduction
