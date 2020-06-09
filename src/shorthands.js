@@ -1,5 +1,40 @@
+function replyMessage(update, tapi, text, extra) {
+  return tapi("sendMessage", {
+    chat_id: update.message ? update.message.chat.id : undefined,
+    text,
+    ...extra,
+  });
+}
+
+function getCommands(update) {
+  return update.message
+    ? update.message.entities
+      ? update.message.entities
+          .map((entity) =>
+            entity.type === "bot_command"
+              ? update.message.text.slice(
+                  entity.offset + 1, // +1 to ensure removal of "/"
+                  entity.offset + entity.length
+                )
+              : undefined
+          )
+          .filter((entity) => entity !== undefined)
+      : []
+    : [];
+}
+
+function getMessage(update) {
+  return {
+    text: update.message.text,
+    photo: update.message.photo,
+    video: update.message.video,
+    sticker: update.message.sticker,
+  };
+}
+
 /**
  * Ran once for each update and not for each handler
+ * Wraps around the actual methods, to prevent everyone of them to be initialized/defined for every update as not every update needs all of the methods.
  */
 function defaultShortHands(update, tapi) {
   return {
@@ -7,11 +42,7 @@ function defaultShortHands(update, tapi) {
      * Short hand for replying a message using the sendMessage tapi method
      */
     replyMessage(text, extra) {
-      return tapi("sendMessage", {
-        chat_id: update.message ? update.message.chat.id : undefined,
-        text,
-        ...extra,
-      });
+      return replyMessage(update, tapi, text, extra);
     },
 
     /**
@@ -21,20 +52,7 @@ function defaultShortHands(update, tapi) {
      * @todo treats everything behind the command as arguments for that command
      */
     get commands() {
-      return update.message
-        ? update.message.entities
-          ? update.message.entities
-              .map((entity) =>
-                entity.type === "bot_command"
-                  ? update.message.text.slice(
-                      entity.offset + 1, // +1 to ensure removal of "/"
-                      entity.offset + entity.length
-                    )
-                  : undefined
-              )
-              .filter((entity) => entity !== undefined)
-          : []
-        : [];
+      return getCommands(update);
     },
 
     /**
@@ -47,12 +65,7 @@ function defaultShortHands(update, tapi) {
      * @todo add command and left+enter chat
      */
     get message() {
-      return {
-        text: update.message.text,
-        photo: update.message.photo,
-        video: update.message.video,
-        sticker: update.message.sticker,
-      };
+      return getMessage(update);
     },
   };
 }
