@@ -1,36 +1,6 @@
-function replyMessage(update, tapi, text, extra) {
-  return tapi("sendMessage", {
-    chat_id: update.message ? update.message.chat.id : undefined,
-    text,
-    ...extra,
-  });
-}
-
-function getCommands(update) {
-  return update.message
-    ? update.message.entities
-      ? update.message.entities
-          .map((entity) =>
-            entity.type === "bot_command"
-              ? update.message.text.slice(
-                  entity.offset + 1, // +1 to ensure removal of "/"
-                  entity.offset + entity.length
-                )
-              : undefined
-          )
-          .filter((entity) => entity !== undefined)
-      : []
-    : [];
-}
-
-function getMessage(update) {
-  return {
-    text: update.message.text,
-    photo: update.message.photo,
-    video: update.message.video,
-    sticker: update.message.sticker,
-  };
-}
+const replyMessage = require("./replyMessage");
+const getCommands = require("./getCommands");
+const getMessage = require("./getMessage");
 
 /**
  * Ran once for each update and not for each handler
