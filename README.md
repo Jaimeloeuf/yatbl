@@ -31,6 +31,8 @@ This library provides 3 types of functionalities:
 
 ## Using this library
 - Refer to the sample codes [here](./samples)
+- Samples included:
+    - Simple Echo Bot
 
 
 ## Additional technical details
