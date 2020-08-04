@@ -16,9 +16,12 @@ async function _onUpdate(updates) {
   for (const update of updates) {
     // Context object binded to "this" in the handlers
     // Call every shorthand creation method with the update object and tapi
-    const ctx = this._shortHands
-      .map((shortHand) => shortHand(update, this.tapi))
-      .reduce((acc, shortHand) => Object.assign(acc, shortHand), {});
+    // Reduce them into a single object to be used as the ctx/this object for the handlers to use
+    const ctx = this._shortHands.reduce(
+      (accumalator, shortHand) =>
+        Object.assign(accumalator, shortHand(update, this.tapi)),
+      {}
+    );
 
     // Loop through these handlers with shared ctx object binded to "this" and update as the arguement
     // Using forEach ensures every handler is called 1 by 1, without blocking the loop through every single update
@@ -35,6 +38,7 @@ class Bot {
   handlers = []; // On update handler functions
   update_id = 0; // Set update_id (used for polling) to start at 0 and use snake case to match tel API response
   _continueLooping = false; // Bool to determine if looping should continue
+  _webhookServer; // Reference to the integrated webhook server
   _shortHands = []; // shortHand method generators
 
   asyncUpdateCounter = 0;
@@ -42,6 +46,9 @@ class Bot {
   constructor(BOT_TOKEN) {
     if (!BOT_TOKEN || BOT_TOKEN === "")
       throw new Error("Bot token required for Bot constructor");
+
+    // Save bot token onto object
+    this._BOT_TOKEN = BOT_TOKEN;
 
     // Create base API url with the bot's token and create tapi function with it
     this.tapi = tapiFF(`https://api.telegram.org/bot${BOT_TOKEN}/`);
