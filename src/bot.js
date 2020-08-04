@@ -43,15 +43,30 @@ class Bot {
 
   asyncUpdateCounter = 0;
 
-  constructor(BOT_TOKEN) {
-    if (!BOT_TOKEN || BOT_TOKEN === "")
-      throw new Error("Bot token required for Bot constructor");
+  /**
+   * @param {String} BOT_TOKEN Telegram Bot token from bot father
+   * @param {Object} configurations Used to configure the bot, changing the default configs
+   */
+  constructor(BOT_TOKEN, configurations = {}) {
+    this.changeToken(BOT_TOKEN);
+  }
+
+  /**
+   * Calling this triggers an immediate change of token and tapi base URL.
+   * Use this with caution as this might change token's while there are still pending calls to use tapi.
+   * Alternatively, spin up a new instance of the Bot class instead of reusing bot instance.
+   * The primary use case for this would be for the constructor and when a new bot token for the same bot has been requested from bot father.
+   * @param {*} NEW_BOT_TOKEN Bot token provided by bot father from telegram
+   */
+  changeToken(NEW_BOT_TOKEN) {
+    if (!NEW_BOT_TOKEN || NEW_BOT_TOKEN === "")
+      throw new Error("Bot token required!");
 
     // Save bot token onto object
-    this._BOT_TOKEN = BOT_TOKEN;
+    this._BOT_TOKEN = NEW_BOT_TOKEN;
 
     // Create base API url with the bot's token and create tapi function with it
-    this.tapi = tapiFF(`https://api.telegram.org/bot${BOT_TOKEN}/`);
+    this.tapi = tapiFF(`https://api.telegram.org/bot${NEW_BOT_TOKEN}/`);
   }
 
   /**

@@ -32,7 +32,8 @@ This library provides 3 types of functionalities:
 ## Using this library
 - Refer to the sample codes [here](./samples)
 - Samples included:
-    - Simple Echo Bot
+    - [Simple Echo Bot](<./samples/simple echo bot.js>)
+    - [Bot that only responds to messages of a single type (photos)](<./samples/single message type (photo).js>)
 
 
 ## Additional technical details
