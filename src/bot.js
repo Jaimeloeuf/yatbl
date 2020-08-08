@@ -1,8 +1,6 @@
 const tapiFF = require("./tapiFF");
 const _onUpdate = require("./onUpdate");
-
-const sleep = async (timeout) =>
-  new Promise((resolve) => setTimeout(resolve, timeout));
+const sleep = require("./sleep");
 
 /**
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
