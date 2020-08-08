@@ -131,6 +131,21 @@ class Bot {
   }
 
   /**
+   * Test if there are any conflicting shorthand methods
+   */
+  checkShortHandConflicts() {
+    const testObject = {};
+
+    // Check if it collides
+    for (const shortHandCreation of this._shortHands)
+      for (const shortHandKey of Object.keys(shortHandCreation())) {
+        if (testObject[shortHandKey])
+          throw new Error(`Short Hand Key conflict, key "${shortHandKey}"`);
+        else testObject[shortHandKey] = true;
+      }
+  }
+
+  /**
    * Add a new update handler/callback to be called on new update
    * @param {function} newHandler handler function to call with update object on new update
    */
