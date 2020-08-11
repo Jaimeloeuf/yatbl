@@ -37,9 +37,11 @@ class Bot {
 
     // Save bot token onto object
     this._BOT_TOKEN = NEW_BOT_TOKEN;
+    // Create base API url with the bot's token
+    this._BASE_URL = `https://api.telegram.org/bot${NEW_BOT_TOKEN}/`;
 
-    // Create base API url with the bot's token and create tapi function with it
-    this.tapi = tapiFF(`https://api.telegram.org/bot${NEW_BOT_TOKEN}/`);
+    // Create tapi function using base URL
+    this.tapi = tapiFF(this._BASE_URL);
   }
 
   /**
@@ -108,21 +110,37 @@ class Bot {
   }
 
   /**
-   * @todo url should follow the standard by telegram API to use the bot token, but allow user to override using options
-   *
-   * @param {*} port
-   * @param {*} options
+   * @note Default url follows telegram API standard of using the base API url where bot token is used, but allow user to override using options
+   * @param {*} [PORT=3000]
+   * @param {*} options Options object for registering the API. Ref to https://core.telegram.org/bots/api#setwebhook
+   * @return {boolean} Boolean returned to determine if webhook is successfully set
    */
-  setWebhook(port, options = {}) {
+  async setWebhook(PORT = 3000, options = {}) {
     this.stopPolling();
+
+    // Start the webhook server and save the server object
+    this._webhookServer = startServer(PORT, this._BOT_TOKEN, {
+      _onUpdate,
+      apiErrorHandler: this.apiErrorHandler,
+    });
+
+    await this.tapi("setWebhook", {
+      url,
+      ...options,
+    });
+
+    // @todo Get the webhook info to ensure webhook is properly set
+
+    return true;
+  }
 
   /**
    * @return {boolean} Boolean returned to determine if webhook is successfully removed
    */
-  async removeWebhook() {
+  async deleteWebhook() {
     try {
       // Remove webhook first to ensure telegram stop sending updates to the webhook server
-      await this.tapi("removeWebHook", {
+      await this.tapi("deleteWebhook", {
         url,
         ...options,
       });
