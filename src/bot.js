@@ -126,7 +126,17 @@ class Bot {
    * @param {function} shortHand method to bind onto "this" of update callbacks
    * @todo Check if the new shorthands' key collide with any existing shorthand method
    */
-  addShortHand(shortHand) {
+  addShortHand(shortHand, name) {
+    // Modify the name of the function if a name is given.
+    // Primary used to change the name of shortHands to prevent naming conflicts
+    // Function is conditionally imported for faster start speeds when no renaming is needed
+    if (name) shortHand = require("./renameFunction")(name, shortHand);
+
+    // Check if the name is taken and warn the user if so.
+    if (this.checkShortHandConflicts(shortHand.name))
+      console.warn(
+        `Function name ${shortHand.name} is taken. Please rename it or else this will override the previous shortHand added`
+      );
     this._shortHands.push(shortHand);
   }
 
