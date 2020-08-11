@@ -142,17 +142,14 @@ class Bot {
 
   /**
    * Test if there are any conflicting shorthand methods
+   * This is called everytime a new shorthand method is added, and can be called externally too to precheck if a name/key is taken
+   * @param {String} nameToCheck Name of the function to check. Name can be accessed using "Function.name"
+   * @returns {Boolean} Whether the name is already registered or not. To be handled by callee
    */
-  checkShortHandConflicts() {
-    const testObject = {};
-
-    // Check if it collides
-    for (const shortHandCreation of this._shortHands)
-      for (const shortHandKey of Object.keys(shortHandCreation())) {
-        if (testObject[shortHandKey])
-          throw new Error(`Short Hand Key conflict, key "${shortHandKey}"`);
-        else testObject[shortHandKey] = true;
-      }
+  checkShortHandConflicts(nameToCheck) {
+    return this._shortHands
+      .map((shortHand) => shortHand.name) // Transform array of functions to array of function names
+      .includes(nameToCheck);
   }
 
   /**
