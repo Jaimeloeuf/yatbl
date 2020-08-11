@@ -116,6 +116,7 @@ class Bot {
    * @return {boolean} Boolean returned to determine if webhook is successfully set
    */
   async setWebhook(PORT = 3000, options = {}) {
+    // Call to stopPolling() to ensure bot instance is not polling before registering as registration will fail
     this.stopPolling();
 
     // Start the webhook server and save the server object
@@ -123,6 +124,8 @@ class Bot {
       _onUpdate,
       apiErrorHandler: this.apiErrorHandler,
     });
+
+    const url = this._BASE_URL;
 
     await this.tapi("setWebhook", {
       url,
@@ -139,6 +142,8 @@ class Bot {
    */
   async deleteWebhook() {
     try {
+      const url = this._BASE_URL;
+
       // Remove webhook first to ensure telegram stop sending updates to the webhook server
       await this.tapi("deleteWebhook", {
         url,
