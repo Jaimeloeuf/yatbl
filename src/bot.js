@@ -115,10 +115,33 @@ class Bot {
    */
   setWebhook(port, options = {}) {
     this.stopPolling();
-    this.tapi("setWebhook", {
-      url,
-      ...options,
-    });
+
+  /**
+   * @return {boolean} Boolean returned to determine if webhook is successfully removed
+   */
+  async removeWebhook() {
+    try {
+      // Remove webhook first to ensure telegram stop sending updates to the webhook server
+      await this.tapi("removeWebHook", {
+        url,
+        ...options,
+      });
+
+      // @todo Get webhook info to ensure webhook is properly removed
+
+      // Close the server once all current updates have been processed
+      // Wrapped in a Promise to use async/await
+      await new Promise((resolve, reject) =>
+        this._webhookServer.close((err) => (err ? reject(err) : resolve()))
+      );
+
+      console.log("Internal webhook server closed");
+      return true;
+    } catch (error) {
+      console.error("Failed to close internal webhook server");
+      console.error(error);
+      return false;
+    }
   }
 
   /**
