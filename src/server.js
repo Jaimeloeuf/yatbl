@@ -23,7 +23,17 @@ async function loop(mws, req, res) {
   return out;
 }
 
-function startServer(PORT, path) {
+/**
+ * Function to start the server by wrapping over polkadot server starting
+ * @param {*} PORT
+ * @param {*} path
+ * @param {Object} {_onUpdate, apiErrorHandler}
+ */
+module.exports = function startServer(
+  PORT,
+  path,
+  { _onUpdate, apiErrorHandler }
+) {
   path = "/" + path;
 
   return polkadot(async function (req, res) {
@@ -34,7 +44,7 @@ function startServer(PORT, path) {
           [
             json(), // Parse request body and put it on req.body
             function main(req, res) {
-              if (!req.body.ok) return errorHandler(req.body);
+              if (!req.body.ok) return apiErrorHandler(req.body);
 
               const { result } = req.body;
               _onUpdate(result);
@@ -52,7 +62,7 @@ function startServer(PORT, path) {
       }
     } catch (error) {
       console.error(error);
-      // this.errorHandler(error);
+      // this.errorHandler(error); // actual error handler instead of the normal api error handler
 
       // Close the connection
       res.statusCode = 400;
@@ -60,14 +70,6 @@ function startServer(PORT, path) {
     }
   }).listen(PORT, (err) => {
     if (err) throw err;
-    console.log(`> Running on localhost:${PORT}`);
+    console.log(`Webhook server now running on localhost:${PORT}`);
   });
-}
-
-const server = startServer(4000, "1");
-
-// To close the server
-// server.close((err) => {
-// if (err) console.error("Failed to close internal webhook server:", err);
-// console.log("Internal webhook server closed");
-// })
+};
