@@ -176,7 +176,7 @@ class Bot {
     // Modify the name of the function if a name is given.
     // Primary used to change the name of shortHands to prevent naming conflicts
     // Function is conditionally imported for faster start speeds when no renaming is needed
-    if (name) shortHand = require("./renameFunction")(name, shortHand);
+    if (name) shortHand = require("./utils/renameFunction")(name, shortHand);
 
     // Check if the name is taken and warn the user if so.
     if (this.checkShortHandConflicts(shortHand.name))
