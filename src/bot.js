@@ -168,21 +168,34 @@ class Bot {
   }
 
   /**
-   * Add a new shorthand method that will be binded to "this" for new update callbacks
-   * @param {function} shortHand method to bind onto "this" of update callbacks
-   * @todo Check if the new shorthands' key collide with any existing shorthand method
+   * Add new shorthand method(s) to bind onto "this" of new update callback handlers
+   * @param {(Function | Array<Function> | object | Array<object>)} shortHand method(s)
    */
-  addShortHand(shortHand, name) {
-    // Modify the name of the function if a name is given.
-    // Primary used to change the name of shortHands to prevent naming conflicts
+  addShortHand(shortHand) {
+    // Foreach has an arrow function to not pass this._addShortHand the optional parameters for a forEach handler
+    if (Array.isArray(shortHand))
+      return shortHand.forEach((shortHand) => this._addShortHand(shortHand));
+    else return this._addShortHand(shortHand);
+  }
+
+  _addShortHand(shortHand) {
+    // Modify name of the function if a name is given.
+    // Primarily used to change the name of shortHands to prevent naming conflicts
     // Function is conditionally imported for faster start speeds when no renaming is needed
-    if (name) shortHand = require("./utils/renameFunction")(name, shortHand);
+    // Else if object with only shortHand, just assign function to the variable
+    if (typeof shortHand === "object" && typeof shortHand.name === "string")
+      shortHand = require("./utils/renameFunction")(name, shortHand);
+    else if (typeof shortHand.shortHand === "function")
+      shortHand = shortHand.shortHand;
+    else throw new Error("Invalid short hand configuration object used!");
 
     // Check if the name is taken and warn the user if so.
+    // Note: users can just ignore this and override previous shortHand that used the same name if needed
     if (this.checkShortHandConflicts(shortHand.name))
       console.warn(
         `Function name ${shortHand.name} is taken. Please rename it or else this will override the previous shortHand added`
       );
+
     this._shortHands.push(shortHand);
   }
 
