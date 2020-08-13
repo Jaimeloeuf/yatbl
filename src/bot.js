@@ -10,9 +10,11 @@ class Bot {
   apiErrorHandler = console.error; // Default error handler is just error logging
   handlers = []; // On update handler functions
   update_id = 0; // Set update_id (used for polling) to start at 0 and use snake case to match tel API response
+  _BOT_TOKEN = "";
+  _BASE_URL = "";
   _continueLooping = false; // Bool to determine if looping should continue
   _webhookServer; // Reference to the integrated webhook server
-  _shortHands = []; // shortHand method generators
+  _shortHands = []; // shortHand methods
 
   asyncUpdateCounter = 0;
 
@@ -178,6 +180,10 @@ class Bot {
     else return this._addShortHand(shortHand);
   }
 
+  /**
+   * Inner method for adding new shorthand method(s) to bind onto "this" of new update callback handlers
+   * @param {(Function | object)} shortHand method(s)
+   */
   _addShortHand(shortHand) {
     // Modify name of the function if a name is given.
     // Primarily used to change the name of shortHands to prevent naming conflicts

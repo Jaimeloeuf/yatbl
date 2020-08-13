@@ -1,6 +1,6 @@
-function replyMessage(update, tapi, text, extra) {
-  return tapi("sendMessage", {
-    chat_id: update.message ? update.message.chat.id : undefined,
+function replyMessage(text, extra) {
+  return this.tapi("sendMessage", {
+    chat_id: this.update.message ? this.update.message.chat.id : undefined,
     text,
     ...extra,
   });
