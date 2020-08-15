@@ -7,8 +7,8 @@
  * @returns {object} Refer to https://core.telegram.org/bots/api#setmycommands
  */
 async function setCommands(tapi, commands = [], options = { merge: true }) {
-  // Merge existing commands and new commands into new array before setting commands
-  if (options.merge) {
+  // Merge existing commands and new commands into new array before setting commands if user did not leave commands empty
+  if (commands.length && options.merge) {
     const response = await tapi("getMyCommands");
     if (response.ok) commands = [...response.result, ...commands];
     else throw new Error("Failed to get existing commands");
