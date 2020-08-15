@@ -1,3 +1,25 @@
+const config = require("./config");
+
+/**
+ * Create context object to bind as "this" of update handlers
+ *
+ * Go over every shorthand method to bind their own "this" context in and,
+ * reducing them into a single object for the "this" context object in handlers
+ * @param {object} ctxForShortHands Object containing the update object and tapi to bind as this for short hand methods
+ * @param {Array<Function>} shortHands the array of shortHand functions
+ * @returns {object} "this" ctx for handlers
+ */
+function createShortHands(ctxForShortHands, shortHands) {
+  // If shortHands is stored as an array
+  return shortHands.reduce(
+    (accumalator, shortHand) =>
+      Object.assign(accumalator, {
+        [shortHand.name]: shortHand.bind(ctxForShortHands), // Keeps the original function name
+      }),
+    {}
+  );
+}
+
 /**
  * _onUpdate handler whose job is to call all the user's update handler callback functions
  * this is used by both webhook and polling
@@ -9,17 +31,14 @@
 module.exports = async function _onUpdate(updates) {
   // Loop through every single update
   for (const update of updates) {
-    // Context object binded to "this" in the handlers
-    // Call every shorthand creation method with the update object and tapi
-    // Reduce them into a single object to be used as the ctx/this object for the handlers to use
-    const ctx = this._shortHands.reduce(
-      (accumalator, shortHand) =>
-        Object.assign(accumalator, shortHand(update, this.tapi)),
-      {}
+    // Create the context object for each update
+    const ctx = createShortHands(
+      { update, tapi: this.tapi }, // Context for the short hand method itself
+      this._shortHands
     );
 
     // Loop through these handlers with shared ctx object binded to "this" and update as the arguement
     // Using forEach ensures every handler is called 1 by 1, without blocking the loop through every single update
-    this.handlers.forEach(async (handler) => await handler.call(ctx, update));
+    this.handlers.forEach((handler) => handler.call(ctx, update));
   }
 };
