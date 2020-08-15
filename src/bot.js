@@ -6,6 +6,7 @@ const sleep = require("./sleep");
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
  */
 class Bot {
+  // Instance variables. Most are defined here more for documentation purposes than anything.
   tapi;
   apiErrorHandler = console.error; // Default error handler is just error logging
   handlers = []; // On update handler functions
@@ -185,12 +186,20 @@ class Bot {
    * @param {(Function | object)} shortHand method(s)
    */
   _addShortHand(shortHand) {
-    // Modify name of the function if a name is given.
-    // Primarily used to change the name of shortHands to prevent naming conflicts
-    // Function is conditionally imported for faster start speeds when no renaming is needed
+    // If shortHand is a function, do nothing
+    // Modify name of function if name is given. Primarily to change names to prevent naming conflicts
+    // Function is conditionally imported for faster load time when no renaming is needed
     // Else if object with only shortHand, just assign function to the variable
-    if (typeof shortHand === "object" && typeof shortHand.name === "string")
-      shortHand = require("./utils/renameFunction")(name, shortHand);
+    // Else the configuration object is invalid.
+    if (typeof shortHand === "function");
+    else if (
+      typeof shortHand === "object" &&
+      typeof shortHand.name === "string"
+    )
+      shortHand = require("./utils/renameFunction")(
+        shortHand.name,
+        shortHand.shortHand
+      );
     else if (typeof shortHand.shortHand === "function")
       shortHand = shortHand.shortHand;
     else throw new Error("Invalid short hand configuration object used!");

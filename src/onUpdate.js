@@ -10,14 +10,10 @@ const config = require("./config");
  * @returns {object} "this" ctx for handlers
  */
 function createShortHands(ctxForShortHands, shortHands) {
-  // If shortHands is stored as an array
-  return shortHands.reduce(
-    (accumalator, shortHand) =>
-      Object.assign(accumalator, {
-        [shortHand.name]: shortHand.bind(ctxForShortHands), // Keeps the original function name
-      }),
-    {}
-  );
+  const ctx = {};
+  for (const shortHand of shortHands)
+    ctx[shortHand.name] = shortHand.bind(ctxForShortHands);
+  return ctx;
 }
 
 /**
