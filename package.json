@@ -1,10 +1,10 @@
 {
   "name": "yatbl",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Yet Another Telegram Bot Library Core",
-  "main": "./src/index.js",
+  "main": "src/index.js",
   "files": [
-    "./src"
+    "src"
   ],
   "scripts": {
     "npm-publish": "git stash --include-untracked && npm publish && git stash apply",
