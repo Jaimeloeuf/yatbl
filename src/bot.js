@@ -1,6 +1,5 @@
 const tapiFF = require("./tapiFF");
-const _onUpdate = require("./onUpdate");
-const sleep = require("./sleep");
+const onUpdate = require("./onUpdate");
 
 /**
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
@@ -8,16 +7,13 @@ const sleep = require("./sleep");
 class Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   tapi;
+  _onUpdate = onUpdate;
   apiErrorHandler = console.error; // Default error handler is just error logging
   handlers = []; // On update handler functions
-  update_id = 0; // Set update_id (used for polling) to start at 0 and use snake case to match tel API response
   _BOT_TOKEN = "";
+  // @todo Make baseUrl on Bot class but as a getter only and cannot be set
   _BASE_URL = "";
-  _continueLooping = false; // Bool to determine if looping should continue
-  _webhookServer; // Reference to the integrated webhook server
   _shortHands = []; // shortHand methods
-
-  asyncUpdateCounter = 0;
 
   /**
    * @param {String} BOT_TOKEN Telegram Bot token from bot father
@@ -53,121 +49,6 @@ class Bot {
    */
   registerApiErrorHandler(apiErrorHandler) {
     this.apiErrorHandler = apiErrorHandler;
-  }
-
-  /**
-   * Start polling
-   * @param {number} [pollingInterval=200] Interval in Milliseconds to poll for updates where interval is the minimum time between each call to the telegram API
-   *
-   * @notice Even if pollingInterval is set to something really small, it will not poll telegram API every single millisecond or whatever, because pollingInterval is the time between EACH call to the API
-   * @notice Which means that you can pass in 0 as the interval to poll without any interval or delay between the getUpdates
-   */
-  async startPolling(pollingInterval = 200) {
-    // Set continue looping flag
-    this._continueLooping = true;
-
-    // Function to poll the telegram API for updates
-    // Arrow function to keep "this" binding
-    const polling = async () => {
-      const update = await this.tapi("getUpdates", {
-        offset: ++this.update_id,
-      });
-
-      // On telegram API failure
-      if (!update.ok) return this.apiErrorHandler(update);
-
-      // If no updates, end this function
-      if (!update.result || !update.result.length) return;
-
-      // Update this.update_id when there is one and use the latest update_id from update response
-      this.update_id = update.result[update.result.length - 1].update_id;
-
-      _onUpdate.call(this, update.result);
-    };
-
-    // Mimics setInterval, but only looping again after the current loop is completed
-    while (this._continueLooping) {
-      // Call this first to ensure it starts the first poll on startPolling and not after the first interval
-      await polling();
-
-      // @todo introduce back pressure control by increasing polling interval
-      if (pollingInterval) await sleep(pollingInterval); // Only sleep/timeout/delay if a pollingInterval is specified
-    }
-  }
-
-  /**
-   * Simple wrapper over stop and start polling to poll at a new interval
-   * @param {number} newInterval the polling interval in ms
-   * @notice This does not change the handlers. Only use if already using polling
-   */
-  changePollingInterval(newInterval) {
-    this.stopPolling();
-    this.startPolling(newInterval);
-  }
-
-  /**
-   * Stop polling
-   */
-  stopPolling() {
-    this._continueLooping = false;
-  }
-
-  /**
-   * @note Default url follows telegram API standard of using the base API url where bot token is used, but allow user to override using options
-   * @param {*} [PORT=3000]
-   * @param {*} options Options object for registering the API. Ref to https://core.telegram.org/bots/api#setwebhook
-   * @return {boolean} Boolean returned to determine if webhook is successfully set
-   */
-  async setWebhook(PORT = 3000, options = {}) {
-    // Call to stopPolling() to ensure bot instance is not polling before registering as registration will fail
-    this.stopPolling();
-
-    // Start the webhook server and save the server object
-    this._webhookServer = startServer(PORT, this._BOT_TOKEN, {
-      _onUpdate,
-      apiErrorHandler: this.apiErrorHandler,
-    });
-
-    const url = this._BASE_URL;
-
-    await this.tapi("setWebhook", {
-      url,
-      ...options,
-    });
-
-    // @todo Get the webhook info to ensure webhook is properly set
-
-    return true;
-  }
-
-  /**
-   * @return {boolean} Boolean returned to determine if webhook is successfully removed
-   */
-  async deleteWebhook() {
-    try {
-      const url = this._BASE_URL;
-
-      // Remove webhook first to ensure telegram stop sending updates to the webhook server
-      await this.tapi("deleteWebhook", {
-        url,
-        ...options,
-      });
-
-      // @todo Get webhook info to ensure webhook is properly removed
-
-      // Close the server once all current updates have been processed
-      // Wrapped in a Promise to use async/await
-      await new Promise((resolve, reject) =>
-        this._webhookServer.close((err) => (err ? reject(err) : resolve()))
-      );
-
-      console.log("Internal webhook server closed");
-      return true;
-    } catch (error) {
-      console.error("Failed to close internal webhook server");
-      console.error(error);
-      return false;
-    }
   }
 
   /**
