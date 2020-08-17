@@ -227,28 +227,40 @@ class Bot {
   }
 
   /**
-   * Add a new update handler/callback to be called on new update
+   * Add a new update handler/callback to be called for every new update
    * @param {function} newHandler handler function to call with update object on new update
+   * @return {Number} Number of handlers registered on this bot
    */
   addHandler(newHandler) {
-    this.handlers.push(newHandler);
+    return this.handlers.push(newHandler);
   }
 
   /**
    * Set a callback to be called when any command is received
    * @param {function} callback Callback function that will be called with the update object
+   * @return {Number} Number of handlers registered on this bot
    */
   onAllCommands(callback) {
-    // @todo
+    const getCommands = require("./shorthands/getCommands"); // Only load shortHand if this method is used
+    // Alternatively -->  () => getCommands().length ? await callback(update) : undefined
+    return this.addHandler(async (update) => {
+      const commandList = getCommands();
+      if (commandList.length) return await callback(commandList, update);
+    });
   }
 
   /**
    * Set a callback for specific commands received
    * @param {string} command Command that will trigger the callback function
    * @param {function} callback Callback function that will be called with the update object
+   * @return {Number} Number of handlers registered on this bot
    */
   onCommand(command, callback) {
-    // @todo
+    const getCommand = require("./shorthands/getCommand"); // Only load shortHand if this method is used
+    return this.addHandler(async (update) => {
+      const parsedCommand = getCommand(command);
+      if (parsedCommand) return await callback(parsedCommand, update);
+    });
   }
 }
 
