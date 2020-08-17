@@ -9,20 +9,21 @@
  * @todo Perhaps allow this method to test for commands, like this.commands("start") // returns bool + arguements
  */
 function getCommands() {
-  return this.update.message
-    ? this.update.message.entities
-      ? this.update.message.entities
-          .map((entity) =>
-            entity.type === "bot_command"
-              ? this.update.message.text.slice(
-                  entity.offset + 1, // +1 to ensure removal of "/"
-                  entity.offset + entity.length
-                )
-              : undefined
-          )
-          .filter((entity) => entity !== undefined)
-      : []
-    : [];
+  if (this.update.message && this.update.message.entities)
+    return (
+      this.update.message.entities
+        .map((entity) =>
+          entity.type === "bot_command"
+            ? this.update.message.text.slice(
+                entity.offset + 1, // +1 to ensure removal of "/"
+                entity.offset + entity.length
+              )
+            : undefined
+        )
+        // Collapse the array's undefined entities
+        .filter((entity) => entity)
+    );
+  else return [];
 }
 
 module.exports = getCommands;

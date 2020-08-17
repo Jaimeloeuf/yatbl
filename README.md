@@ -70,6 +70,13 @@ This library will:
     - So if one of the handlers take really long to complete, the overall response will take extra long. Thus it is recommended to keep your update handlers as synchronous functions that call async methods without any awaits and let them complete in the background.
         - An example would be responding to a message using "tapi", where tapi is async.
         - The update handler should be synchronous and call tapi without awaiting for it, letting tapi run off in the background. -->
+- Bot/PollingBot/WebhookBot classes and their structure:
+    - The core Bot functionalities are all implemented in the Bot class
+    - The PollingBot and WebhookBot are classes that extends the base Bot class with polling and webhook functionality
+    - This is done for modularity, readability and bug containment
+    - By having core functionalities in the Bot, advance users can choose to, if they want, to implement polling and webhook functionality on their OWN, and just using the Bot class for the update handler calling and shortHand plugin architecture
+
+
 
 
 
