@@ -4,12 +4,10 @@
 
 require("dotenv").config();
 
-const Bot = require("../src/bot");
-const shortHands = require("../src/shorthands/defaultShortHands");
+const { PollingBot, shortHands } = require("../src");
+const bot = new PollingBot(process.env.BOT_TOKEN);
 
-const bot = new Bot(process.env.BOT_TOKEN);
-
-bot.addShortHand(shortHands);
+bot.addShortHand(shortHands.replyMessage);
 
 bot.addHandler(function (update) {
   this.replyMessage(this.message.text, {

@@ -4,8 +4,8 @@
 
 require("dotenv").config();
 
-const { Bot, shortHands } = require("../src");
-const bot = new Bot(process.env.BOT_TOKEN);
+const { PollingBot, shortHands } = require("../src");
+const bot = new PollingBot(process.env.BOT_TOKEN);
 const tapi = bot.tapi;
 
 const botCommands = [

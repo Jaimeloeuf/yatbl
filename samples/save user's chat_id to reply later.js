@@ -4,12 +4,8 @@
 
 require("dotenv").config();
 
-const Bot = require("../src/bot");
-const shortHands = require("../src/shorthands/defaultShortHands");
-
-const bot = new Bot(process.env.BOT_TOKEN);
-
-bot.addShortHand(shortHands);
+const { PollingBot } = require("../src");
+const bot = new PollingBot(process.env.BOT_TOKEN);
 
 bot.addHandler(function (update) {
   setTimeout(() => {
