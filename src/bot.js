@@ -125,7 +125,8 @@ class Bot {
     const getCommands = require("./shorthands/getCommands"); // Only load shortHand if this method is used
     // Alternatively -->  () => getCommands().length ? await callback(update) : undefined
     return this.addHandler(async (update) => {
-      const commandList = getCommands();
+      // Bind update to this when calling shortHand
+      const commandList = getCommands.call({ update });
       if (commandList.length) return await callback(commandList, update);
     });
   }
@@ -139,7 +140,8 @@ class Bot {
   onCommand(command, callback) {
     const getCommand = require("./shorthands/getCommand"); // Only load shortHand if this method is used
     return this.addHandler(async (update) => {
-      const parsedCommand = getCommand(command);
+      // Bind update to this when calling shortHand
+      const parsedCommand = getCommand.call({ update }, command);
       if (parsedCommand) return await callback(parsedCommand, update);
     });
   }
