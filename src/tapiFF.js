@@ -2,10 +2,12 @@ const fetch = require("node-fetch");
 
 /**
  * tapi Factory Function
- * @param {string} baseUrl The base telegram API URL
+ * @param {string} BOT_TOKEN Telegram bot token, the base telegram API url will be generated with this
  * @returns {function} The tapi function
  */
-function tapiFF(baseUrl) {
+function tapiFF(BOT_TOKEN) {
+  const baseUrl = `https://api.telegram.org/bot${BOT_TOKEN}/`;
+
   /**
    * By default uses HTTP POST method and JSON body for sending data
    * @param {string} tApiMethod Telegram API method found on https://core.telegram.org/bots/api#available-methods

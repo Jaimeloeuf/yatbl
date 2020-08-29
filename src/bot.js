@@ -12,7 +12,6 @@ class Bot {
   handlers = []; // On update handler functions
   _BOT_TOKEN = "";
   // @todo Make baseUrl on Bot class but as a getter only and cannot be set
-  _BASE_URL = "";
   _shortHands = []; // shortHand methods
 
   /**
@@ -36,11 +35,9 @@ class Bot {
 
     // Save bot token onto object
     this._BOT_TOKEN = NEW_BOT_TOKEN;
-    // Create base API url with the bot's token
-    this._BASE_URL = `https://api.telegram.org/bot${NEW_BOT_TOKEN}/`;
 
-    // Create tapi function using base URL
-    this.tapi = tapiFF(this._BASE_URL);
+    // Create tapi function using bot token
+    this.tapi = tapiFF(NEW_BOT_TOKEN);
   }
 
   /**
