@@ -23,6 +23,11 @@ class PollingBot extends Bot {
    * @notice Which means that you can pass in 0 as the interval to poll without any interval or delay between the getUpdates
    *
    * @todo Implement restart calls. Instead of re-creating everything, check if there is a polling loop already first.
+   *
+   * @todo
+   * - Perhaps the fix for the issue where messages get skipped, is to stop using "dont care loops",
+   * - meaning, we should only make the nxt API call, once the first polling is completed
+   * - Or an easier way is just to await the polling method call.
    */
   async startPolling(pollingInterval = 200) {
     // Set continue looping flag

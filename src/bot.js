@@ -11,7 +11,6 @@ class Bot {
   apiErrorHandler = console.error; // Default error handler is just error logging
   handlers = []; // On update handler functions
   _BOT_TOKEN = "";
-  // @todo Make baseUrl on Bot class but as a getter only and cannot be set
   _shortHands = []; // shortHand methods
 
   /**
@@ -121,6 +120,7 @@ class Bot {
   onAllCommands(callback) {
     const getCommands = require("./shorthands/getCommands"); // Only load shortHand if this method is used
     // Alternatively -->  () => getCommands().length ? await callback(update) : undefined
+    // Alternatively -->  () => getCommands().length && await callback(update)
     // Using function instead of arrow function to prevent inheriting the "this" value binding, of the object's method.
     // Instead, we want the "this" binding that is passed in via the onUpdate method
     return this.addHandler(async function (update) {
@@ -147,6 +147,25 @@ class Bot {
       if (parsedCommand)
         return await callback.call(this, parsedCommand, update);
     });
+  }
+
+  /**
+   * Wrapper over addHandler method to set callbacks for updates that are ONLY messages, and no command type updates
+   * @param {Function} callback function to be used as the handler for this type of updates
+   */
+  onMessage(callback) {
+    const noCommands = require("./shorthands/noCommands"); // Only load shortHand if this method is used
+    // Using function instead of arrow function to prevent inheriting the "this" value binding, of the object's method.
+    // Instead, we want the "this" binding that is passed in via the onUpdate method
+    return this.addHandler(async function (update) {
+      // Bind update to this when calling shortHand
+      if (noCommands.call({ update })) return await callback.call(this, update);
+    });
+
+    // Alternatively, use && shortcircuiting with noCommands call
+    // return this.addHandler(async function (update) {
+    //   return noCommands.call({ update }) && (await callback.call(this, update));
+    // });
   }
 }
 
