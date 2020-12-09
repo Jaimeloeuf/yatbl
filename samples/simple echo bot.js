@@ -10,7 +10,7 @@ const bot = new PollingBot(process.env.BOT_TOKEN);
 bot.addShortHand(shortHands.replyMessage);
 
 bot.addHandler(function (update) {
-  this.replyMessage(this.message.text, {
+  this.replyMessage(update.message.text, {
     reply_to_message_id: update.message.message_id,
   });
 });
