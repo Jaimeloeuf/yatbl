@@ -30,6 +30,9 @@ class PollingBot extends Bot {
    * - Or an easier way is just to await the polling method call.
    */
   async startPolling(pollingInterval = 200) {
+    // Delete webhook before using getUpdates to prevent conflicts https://core.telegram.org/bots/api#deletewebhook
+    await this.tapi("deleteWebhook");
+
     // Set continue looping flag
     this._continueLooping = true;
 
