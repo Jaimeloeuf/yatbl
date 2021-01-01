@@ -4,6 +4,7 @@
  */
 
 const Bot = require("./bot");
+const startServer = require("./server");
 
 class WebhookBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
@@ -38,8 +39,9 @@ class WebhookBot extends Bot {
    * @return {boolean} If webhook is successfully set
    */
   async setWebhook(options = {}) {
+    // Use BOT_TOKEN set onto the object by the constructor
     await this.tapi("setWebhook", {
-      url: `https://api.telegram.org/bot${BOT_TOKEN}/`,
+      url: `https://api.telegram.org/bot${this._BOT_TOKEN}/`,
       ...options,
     });
 
