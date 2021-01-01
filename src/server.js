@@ -25,8 +25,8 @@ async function loop(mws, req, res) {
 
 /**
  * Function to start the server by wrapping over polkadot server starting
- * @param {*} PORT
- * @param {*} path
+ * @param {Number} PORT
+ * @param {String} path The bot token should be passed in to follow telegram API standard of using bot token as the base API url, else any secret string will do too.
  * @param {Object} {_onUpdate, apiErrorHandler}
  */
 module.exports = function startServer(
@@ -36,6 +36,9 @@ module.exports = function startServer(
 ) {
   path = "/" + path;
 
+  // @todo Only log it in debug/verbose mode
+  console.log("Webhook server listening to: ", path);
+
   return polkadot(async function (req, res) {
     try {
       // Only if exact matche of path and method, then do we execute middlewares and return their result
@@ -43,6 +46,8 @@ module.exports = function startServer(
         return await loop(
           [
             json(), // Parse request body and put it on req.body
+
+            // Main request handler as a middleware
             function main(req, res) {
               if (!req.body.ok) return apiErrorHandler(req.body);
 
