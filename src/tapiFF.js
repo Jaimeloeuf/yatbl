@@ -1,12 +1,15 @@
-const fetch = require("node-fetch");
-
 /**
- * tapi Factory Function
- * @param {string} BOT_TOKEN Telegram bot token, the base telegram API url will be generated with this
- * @returns {function} The tapi function
+ * tapi (telegram API) Factory Function
+ * @param {String} BOT_TOKEN Telegram bot token, the base telegram API url will be generated with this
+ * @returns {Function} The tapi function
  */
 function tapiFF(BOT_TOKEN) {
+  if (!BOT_TOKEN) throw new Error("Missing BOT_TOKEN");
+
   const baseUrl = `https://api.telegram.org/bot${BOT_TOKEN}/`;
+
+  // Load fetch lib lazily, only if the FF is invoked
+  const fetch = require("node-fetch");
 
   /**
    * By default uses HTTP POST method and JSON body for sending data
