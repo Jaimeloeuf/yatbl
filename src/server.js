@@ -27,13 +27,10 @@ async function loop(mws, req, res) {
  * Function to start the server by wrapping over polkadot server starting
  * @param {Number} PORT
  * @param {String} path The bot token should be passed in to follow telegram API standard of using bot token as the base API url, else any secret string will do too.
- * @param {Object} {_onUpdate, apiErrorHandler}
+ * @param {Function} _onUpdate
+ * @param {Function} apiErrorHandler
  */
-module.exports = function startServer(
-  PORT,
-  path,
-  { _onUpdate, apiErrorHandler }
-) {
+module.exports = function startServer(PORT, path, _onUpdate, apiErrorHandler) {
   path = "/" + path;
 
   // @todo Only log it in debug/verbose mode

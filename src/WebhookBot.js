@@ -26,10 +26,13 @@ class WebhookBot extends Bot {
    */
   async startServer(PORT = 3000) {
     // Start the webhook server and save reference to the server
-    this._webhookServer = startServer(PORT, this._BOT_TOKEN, {
-      _onUpdate: this._onUpdate,
-      apiErrorHandler: this.apiErrorHandler,
-    });
+    this._webhookServer = startServer.call(
+      this,
+      PORT,
+      this._BOT_TOKEN,
+      this._onUpdate,
+      this.apiErrorHandler
+    );
   }
 
   /**
