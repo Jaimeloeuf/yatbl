@@ -25,6 +25,7 @@ async function loop(mws, req, res) {
 
 /**
  * Function to start the server by wrapping over polkadot server starting
+ * @notice "this" is expected to be passed in for this function to re-bind it to onUpdate function which REQUIRES it to be a instance of the Bot class.
  * @param {Number} PORT
  * @param {String} path The bot token should be passed in to follow telegram API standard of using bot token as the base API url, else any secret string will do too.
  * @param {Function} _onUpdate
@@ -36,20 +37,22 @@ module.exports = function startServer(PORT, path, _onUpdate, apiErrorHandler) {
   // @todo Only log it in debug/verbose mode
   console.log("Webhook server listening to: ", path);
 
-  return polkadot(async function (req, res) {
+  // Arrow function passed in to keep "this" binding of startServer function
+  return polkadot(async (req, res) => {
     try {
-      // Only if exact matche of path and method, then do we execute middlewares and return their result
+      // Only execute middlewares and return their result if path and method matches exactly
       if (req.path === path && req.method === "POST")
         return await loop(
           [
             json(), // Parse request body and put it on req.body
 
             // Main request handler as a middleware
-            function main(req, res) {
+            // Using an arrow function to keep the "this" binding of startServer function
+            (req, res) => {
               if (!req.body.ok) return apiErrorHandler(req.body);
 
-              const { result } = req.body;
-              _onUpdate(result);
+              // Pass result to onUpdate while binding the Bot instance in
+              _onUpdate.call(this, req.body.result);
 
               // Rely on "@polka/send-type" internally with return
               return { user: "data" };
