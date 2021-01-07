@@ -26,6 +26,9 @@ class WebhookBot extends Bot {
    */
   async startServer(PORT = 3000) {
     // Start the webhook server and save reference to the server
+    // Call the startServer function with "call" method to bind "this" which is the current instance of the WebhookBot
+    // This is because onUpdate functions needs a "this" binding that is a instance of the Bot Class,
+    // Thus we are passing the current instance to startServer, which will call onUpdate with this instance binded to "this"
     this._webhookServer = startServer.call(
       this,
       PORT,

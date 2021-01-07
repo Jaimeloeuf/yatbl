@@ -18,7 +18,8 @@ function createShortHands(ctxForShortHands, shortHands) {
 
 /**
  * _onUpdate handler whose job is to call all the user's update handler callback functions
- * this is used by both webhook and polling
+ * This function is used by both webhook and polling
+ * @notice You MUST bind a instance of the Bot class to "this" when calling this function, as it relies on the instance values.
  * @param {object} updates Array of Update objects from telegram https://core.telegram.org/bots/api#update
  *
  *
