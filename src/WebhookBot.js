@@ -74,18 +74,19 @@ class WebhookBot extends Bot {
   }
 
   /**
+   * Start a webhook server and Set/Register webhook URL with telegram server
    * Refer to the setWebhook and startServer methods for more details.
    * This function just wraps over these 2 methods
-   * @param {Object} options https://core.telegram.org/bots/api#setwebhook
+   * The parameters are also the same as the 2 methods, refer to them for more details.
    *
    * @todo Maybe add a try catch or smth?
    * @todo Add a return value perhaps?
    */
-  async setWebhookAndStartServer(options) {
+  async setWebhookAndStartServer(url, options, port) {
     // Start server first before setting up webhook integration with telegram API to ensure
     // server is up and running before telegram API attempts to send any updates.
-    await this.startServer(options.PORT);
-    await this.setWebhook(options);
+    await this.startServer(port);
+    await this.setWebhook(url, options);
   }
 
   /**
