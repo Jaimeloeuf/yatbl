@@ -39,15 +39,32 @@ class WebhookBot extends Bot {
   }
 
   /**
-   * Start a webhook server and Set/Register webhook URL with telegram server
-   * @note Default url follows telegram API standard of using the base API url where bot token is used, but allow user to override using options
-   * @param {object} [options={}] Options object for registering the API. Ref to https://core.telegram.org/bots/api#setwebhook
+   * Set/Register webhook URL with telegram server. Run this only after server is started and ready for incoming updates.
+   * Reference: https://core.telegram.org/bots/api#setwebhook
+   * @note Default url path follows telegram API standard of using bot token as the base API url, but allow user to override using options.path
+   * @param {String} url HTTPS URL to send updates to, options.path or bot token will be appended to path.
+   * @param {Object} [options={}] Options object for registering the API, refer to telegram API reference
    * @return {boolean} If webhook is successfully set
    */
-  async setWebhook(options = {}) {
-    // Use BOT_TOKEN set onto the object by the constructor
+  async setWebhook(url, options = {}) {
+    // Validate url and ensure it is https first
+    try {
+      const urlObject = new URL(url);
+      if (urlObject.protocol !== "https:") throw new Error();
+    } catch (_) {
+      // Catch and re-throw with specific error message
+      throw new Error(
+        "Invalid Webhook URL! See 'https://core.telegram.org/bots/api#setwebhook'"
+      );
+    }
+
+    // Get webhook url path, either from options or following telegram's recommendations, use the bot token (set on object by the constructor)
+    const urlPath = options.path || this._BOT_TOKEN;
+    // If path is specified in options, delete before spreading options object onto setWebhook API call request body
+    if (options.path) delete options.path;
+
     await this.tapi("setWebhook", {
-      url: `https://api.telegram.org/bot${this._BOT_TOKEN}/`,
+      url: url + urlPath,
       ...options,
     });
 
