@@ -63,14 +63,17 @@ class WebhookBot extends Bot {
     // If path is specified in options, delete before spreading options object onto setWebhook API call request body
     if (options.path) delete options.path;
 
-    await this.tapi("setWebhook", {
+    // Call setWebhook API and get back the response to check if the setup was successful
+    const setWebhookResponse = await this.tapi("setWebhook", {
+      // also can we read the hostname of the server and figure out the domain name? then add the path to the back?
       url: url + urlPath,
       ...options,
     });
 
-    // @todo Get the webhook info to ensure webhook is properly set
+    // Throw error from telegram if webhook setup failed.
+    if (!setWebhookResponse.ok) throw new Error(setWebhookResponse.description);
 
-    return true;
+    console.log("Webhook successfully set to: ", url + urlPath);
   }
 
   /**
