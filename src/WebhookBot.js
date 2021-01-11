@@ -107,10 +107,15 @@ class WebhookBot extends Bot {
   async stopServer() {
     try {
       // Close server once all current updates have been processed
-      // Wrapped in a Promise to use async/await
+      // Wrapped in a Promise to use async/await to run it sequentially and use within a try/catch block
       await new Promise((resolve, reject) =>
         this._webhookServer.close((err) => (err ? reject(err) : resolve()))
       );
+
+      // Alternative to promise wrapping code above using native util.promisify method
+      // This is the more official way to do it, but contains more unneccessary code without any value.
+      // const closeServer = require("util").promisify(this._webhookServer.close);
+      // await closeServer();
 
       console.log("Internal webhook server closed");
       return true;
@@ -119,6 +124,17 @@ class WebhookBot extends Bot {
       console.error(error);
       return false;
     }
+  }
+
+  /**
+   * Wrapper method over deleteWebhook and stopServer methods to make it easier for users to call them in order
+   * Refer to deleteWebhook for parameters, as params are directly passed to that method
+   *
+   * @todo Auto call this using a process.onExit / onError handler
+   */
+  async stopServerAndRemoveWebhook(options) {
+    await this.deleteWebhook(options);
+    await this.stopServer();
   }
 }
 
