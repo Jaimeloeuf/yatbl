@@ -90,22 +90,23 @@ class WebhookBot extends Bot {
   }
 
   /**
+   * @param {Object} [options={}] Reference: https://core.telegram.org/bots/api#deletewebhook
    * @return {boolean} Boolean returned to determine if webhook is successfully removed
-   * @todo Split this up to be a delete webhook and stop server
+   *
+   * @todo Get webhook info to ensure webhook is properly removed
    */
-  async deleteWebhook() {
+  async deleteWebhook(options = {}) {
+    // Remove webhook to ensure telegram stop sending updates to this webhook server
+    return this.tapi("deleteWebhook", options);
+  }
+
+  /**
+   * Only run this method to stop server after deleting webhook integration config with telegram method using the 'deleteWebhook' method
+   * @return {boolean} Boolean returned to indicate if server is successfully stopped
+   */
+  async stopServer() {
     try {
-      const url = `https://api.telegram.org/bot${BOT_TOKEN}/`;
-
-      // Remove webhook first to ensure telegram stop sending updates to the webhook server
-      await this.tapi("deleteWebhook", {
-        url,
-        ...options,
-      });
-
-      // @todo Get webhook info to ensure webhook is properly removed
-
-      // Close the server once all current updates have been processed
+      // Close server once all current updates have been processed
       // Wrapped in a Promise to use async/await
       await new Promise((resolve, reject) =>
         this._webhookServer.close((err) => (err ? reject(err) : resolve()))
