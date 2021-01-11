@@ -32,6 +32,11 @@ This library provides 3 core functionalities:
     - By relying on native APIs whenever possible and using as little external dependencies as possible.
 
 
+## Development
+- Note that this library is still under development and although it has been used in certain products, use it in production at your own risk.
+- This library uses common JS for modules
+
+
 ## Using this library
 - Refer to the sample codes [here](./samples)
 - Samples included:
@@ -77,12 +82,15 @@ This library will:
     - By having core functionalities in the Bot, advance users can choose to, if they want, to implement polling and webhook functionality on their OWN, and just using the Bot class for the update handler calling and shortHand plugin architecture
 
 
+## Handling load spikes
+1. Polling method, use back pressure and slow down polling by tracking the num of updates being handled currently
+    - Use this if it is ok, if the average bot reponse time goes up to ensure uniform resource usage
+2. Webhook method, use serverless architecture to scale if you want to keep avrg bot response time uniform and low without regard for resource usage.
+    - This solution simply increase the number of instances of bot update handlers
+        - Using this method, these functions should only run the bot update handler code instead of the main server.
+        - WIP tutorial and sample bot on how to do this.
+    - Scales better in most cases with serverless functions instead of serverless CaaS solutions since using functions the provider handles the http request routing for you already and you do not need to handle it yourself
 
-
-
-## Development
-- Note that this library is still under development and is not stable for production.
-- This library uses common JS for modules
 
 
 ## License, Author and Contributing
