@@ -40,7 +40,7 @@ module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
   // Arrow function passed in to keep "this" binding of startServer function
   return polkadot(async (req, res) => {
     try {
-      // Only execute middlewares and return their result if path and method matches exactly
+      // Only execute middlewares if path and method matches exactly
       if (req.path === path && req.method === "POST")
         return await loop(
           [
@@ -54,8 +54,8 @@ module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
               // Only a SINGLE update will be sent via webhook everytime.
 
               // Put update object in an array since onUpdate always expects an array of update(s)
-              // Pass result to onUpdate while binding the Bot instance in
-              onUpdate.call(this, [req.body.result]);
+              // Call onUpdate with update object and bind the Bot instance to onUpdate's "this"
+              onUpdate.call(this, [req.body]);
 
               // Rely on "@polka/send-type" internally with return
               return { user: "data" };
