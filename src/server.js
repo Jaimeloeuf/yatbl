@@ -42,7 +42,7 @@ module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
     try {
       // Only execute middlewares if path and method matches exactly
       if (req.path === path && req.method === "POST")
-        return await loop(
+        return loop(
           [
             json(), // Parse request body and put it on req.body
 
@@ -58,13 +58,15 @@ module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
               onUpdate.call(this, [req.body]);
 
               // Rely on "@polka/send-type" internally with return
-              return { user: "data" };
+              return {};
             },
           ],
           req,
           res
         );
       else {
+        // If route is invalid, we assume it is not telegram that called our API
+        // Thus return 404 and dont respond to any updates sent
         res.statusCode = 404;
         res.end();
       }

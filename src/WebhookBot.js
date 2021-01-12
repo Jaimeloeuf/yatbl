@@ -20,9 +20,13 @@ class WebhookBot extends Bot {
 
   /**
    * Start a webhook server and Set/Register webhook URL with telegram server
+   * @note Any errors thrown in 'startServer' function will be bubbled up
    * @note Default url follows telegram API standard of using the base API url where bot token is used, but allow user to override using options
-   * @param {*} [PORT=3000]
-   * @return {boolean} @todo If webhook server successfully started
+   * @param {Number} [PORT=3000] The port on localhost for the server to listen to.
+   * Defaults to 3000 assuming bot server does not handle HTTPS directly, rather traffic is routed from a reverse proxy.
+   * Since the built in webhook server will not handle HTTPS, and node is not exactly good at it,
+   * it is recommended to set webhook to a reverse proxy, and have the traffic routed to this.
+   * Doing this also allows multiple bots to share the same domain and port, with just different URL paths.
    */
   async startServer(PORT = 3000) {
     // Start the webhook server and save reference to the server
@@ -44,7 +48,6 @@ class WebhookBot extends Bot {
    * @note Default url path follows telegram API standard of using bot token as the base API url, but allow user to override using options.path
    * @param {String} url HTTPS URL to send updates to, options.path or bot token will be appended to path.
    * @param {Object} [options={}] Options object for registering the API, refer to telegram API reference
-   * @return {boolean} If webhook is successfully set
    */
   async setWebhook(url, options = {}) {
     // Validate url and ensure it is https first
@@ -111,9 +114,12 @@ class WebhookBot extends Bot {
     try {
       // Close server once all current updates have been processed
       // Wrapped in a Promise to use async/await to run it sequentially and use within a try/catch block
-      await new Promise((resolve, reject) =>
-        this._webhookServer.close((err) => (err ? reject(err) : resolve()))
-      );
+      // Check if server is created and set on instance because if startServer fails,
+      // and process.on("uncaughtException") catches it, then we dont want to call "close" on undefined
+      if (this._webhookServer)
+        await new Promise((resolve, reject) =>
+          this._webhookServer.close((err) => (err ? reject(err) : resolve()))
+        );
 
       // Alternative to promise wrapping code above using native util.promisify method
       // This is the more official way to do it, but contains more unneccessary code without any value.
