@@ -3,7 +3,7 @@
  * @param {String} BOT_TOKEN Telegram bot token, the base telegram API url will be generated with this
  * @returns {Function} The tapi function
  */
-function tapiFF(BOT_TOKEN) {
+module.exports = function tapiFF(BOT_TOKEN) {
   if (!BOT_TOKEN) throw new Error("Missing BOT_TOKEN");
 
   const baseUrl = `https://api.telegram.org/bot${BOT_TOKEN}/`;
@@ -29,6 +29,4 @@ function tapiFF(BOT_TOKEN) {
   }
 
   return tapi;
-}
-
-module.exports = tapiFF;
+};

@@ -47,6 +47,15 @@ This library provides 3 core functionalities:
         - This is a shortHand that users can use to reply to a message directly per update without needing to get the chat_id from update object before sending that chat_id a message
     - [Reading and setting bot commands](<./samples/setting and reading bot commands.js>)
         - Sample to showcase how to read the existing bot commands and set new ones using a default shortHand
+    - [webhook demo](<./samples/webhook.js>)
+
+
+## Webhook
+To use webhook to get updates delivered to your bot,
+- Use the built in Webhook Bot and webhook server
+- Note that when using the built in webhook server, you have to use it with a reverse proxy that can handle HTTPS termination
+    - E.g. Container as a Service platforms like [Google Cloud Run](https://cloud.google.com/run)
+    - Node isnt really designed to handle HTTPS termination, so the webhook server is stripped down to its bare minimum to just take care of calling the onUpdate method from valid incoming HTTP connections.
 
 ## ShortHands
 This library provides a plugin system that users can use to simplify their development experience with reusable plugins.  
@@ -54,6 +63,7 @@ ShortHands are basically plugins, that are methods to abstract over common funct
 This library will:
 - Help to bind each update object and a tapi utility method to every shortHand method for them to build abstractions
 - Attach these methods onto the "this" context of every update handler for easy access by the library and shortHand method user
+
 
 ## Additional technical details
 - Callback functions for new updates have a custom "this" binded to them for you to access shorthand methods, and to pass data along to the next update handler by binding data onto "this"

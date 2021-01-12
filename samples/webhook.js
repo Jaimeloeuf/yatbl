@@ -15,7 +15,4 @@ bot.addHandler(function (update) {
   });
 });
 
-bot.setWebhookAndStartServer();
-// bot.setWebhookAndStartServer({
-//   url: "https://bot-api.example.com",
-// });
+bot.setWebhookAndStartServer("https://bot-api.example.com");

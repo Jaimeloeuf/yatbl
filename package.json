@@ -1,6 +1,6 @@
 {
   "name": "yatbl",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Yet Another Telegram Bot Library Core",
   "main": "src/index.js",
   "files": [
