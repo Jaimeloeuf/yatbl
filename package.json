@@ -11,13 +11,9 @@
     "test": "npx mocha"
   },
   "dependencies": {
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.19.2",
     "node-fetch": "^2.6.0",
     "polkadot": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Enkel-Digital/yatbl.git"
   },
   "keywords": [
     "telegram",
@@ -28,12 +24,12 @@
   ],
   "author": "JJ",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Enkel-Digital/yatbl.git"
+  },
   "bugs": {
     "url": "https://github.com/Enkel-Digital/yatbl/issues"
   },
-  "homepage": "https://github.com/Enkel-Digital/yatbl#readme",
-  "devDependencies": {
-    "dotenv": "^8.2.0",
-    "mocha": "^8.1.1"
-  }
+  "homepage": "https://github.com/Enkel-Digital/yatbl#readme"
 }
