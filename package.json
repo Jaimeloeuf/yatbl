@@ -2,18 +2,23 @@
   "name": "yatbl",
   "version": "0.6.1",
   "description": "Yet Another Telegram Bot Library Core",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "files": [
-    "src"
+    "dist"
   ],
   "scripts": {
     "npm-publish": "git stash --include-untracked && npm publish && git stash apply",
-    "test": "npx mocha"
+    "build": "npx tsc",
+    "build:watch": "npx tsc -w"
   },
   "dependencies": {
     "body-parser": "^1.19.2",
     "node-fetch": "^2.6.0",
     "polkadot": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.22",
+    "typescript": "^4.6.2"
   },
   "keywords": [
     "telegram",
