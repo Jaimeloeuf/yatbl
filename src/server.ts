@@ -2,8 +2,8 @@
  * https://github.com/lukeed/polkadot/blob/master/examples/with-middleware/index.js
  */
 
-const polkadot = require("polkadot");
-const { json } = require("body-parser");
+import polkadot from "polkadot";
+import { json } from "body-parser";
 
 /**
  * Used to loop over all middlewares and call them 1 by 1
@@ -31,7 +31,12 @@ async function loop(mws, req, res) {
  * @param {Function} onUpdate
  * @param {Function} apiErrorHandler
  */
-module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
+export default function startServer(
+  PORT: number,
+  path: string,
+  onUpdate: Function,
+  apiErrorHandler: Function
+) {
   path = "/" + path;
 
   // @todo Only log it in debug/verbose mode
@@ -58,6 +63,7 @@ module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
               onUpdate.call(this, [req.body]);
 
               // Rely on "@polka/send-type" internally with return
+              // @todo Integrate this with tapi!
               return {};
             },
           ],
@@ -82,4 +88,4 @@ module.exports = function startServer(PORT, path, onUpdate, apiErrorHandler) {
     if (err) throw err;
     console.log(`Webhook server now running on localhost:${PORT}`);
   });
-};
+}
