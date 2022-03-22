@@ -1,7 +1,7 @@
-const Bot = require("./bot");
-const sleep = require("./sleep");
+import Bot from "./bot";
+import sleep from "./sleep";
 
-class PollingBot extends Bot {
+export default class PollingBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   _update_id = 0; // Set _update_id (used for polling) to start at 0 and use snake case to match tel API response
   _continueLooping = false; // Bool to determine if looping should continue
@@ -10,8 +10,10 @@ class PollingBot extends Bot {
   /**
    * @param {String} BOT_TOKEN Telegram Bot token from bot father
    * @param {Object} configurations Used to configure the bot, changing the default configs
+   *
+   * @todo Annotate the configurations type, either here or in Bot class
    */
-  constructor(BOT_TOKEN, configurations = {}) {
+  constructor(BOT_TOKEN: string, configurations: object = {}) {
     super(BOT_TOKEN, configurations);
   }
 
@@ -29,7 +31,7 @@ class PollingBot extends Bot {
    * - meaning, we should only make the nxt API call, once the first polling is completed
    * - Or an easier way is just to await the polling method call.
    */
-  async startPolling(pollingInterval = 200) {
+  async startPolling(pollingInterval: number = 200) {
     // Delete webhook before using getUpdates to prevent conflicts https://core.telegram.org/bots/api#deletewebhook
     // This is ran to completion before flag setting to ensure looping does not start before webhook config with telegram API is deleted.
     await this.tapi("deleteWebhook");
@@ -78,10 +80,8 @@ class PollingBot extends Bot {
    * @param {number} newInterval the polling interval in ms
    * @notice This does not change the handlers. Only use if already using polling
    */
-  changePollingInterval(newInterval) {
+  changePollingInterval(newInterval: number) {
     this.stopPolling();
     this.startPolling(newInterval);
   }
 }
-
-module.exports = PollingBot;
