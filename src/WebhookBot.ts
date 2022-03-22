@@ -3,10 +3,10 @@
  * @todo startServer and setWebhook should be "seperate" methods as users might want to use builtin method to set webhook, but want to run their own webhook server.
  */
 
-const Bot = require("./bot");
-const startServer = require("./server");
+import Bot from "./bot";
+import startServer from "./server";
 
-class WebhookBot extends Bot {
+export default class WebhookBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   _webhookServer; // Reference to the integrated webhook server
 
@@ -14,7 +14,7 @@ class WebhookBot extends Bot {
    * @param {String} BOT_TOKEN Telegram Bot token from bot father
    * @param {Object} configurations Used to configure the bot, changing the default configs
    */
-  constructor(BOT_TOKEN, configurations = {}) {
+  constructor(BOT_TOKEN: string, configurations: object = {}) {
     super(BOT_TOKEN, configurations);
   }
 
@@ -28,7 +28,7 @@ class WebhookBot extends Bot {
    * it is recommended to set webhook to a reverse proxy, and have the traffic routed to this.
    * Doing this also allows multiple bots to share the same domain and port, with just different URL paths.
    */
-  async startServer(PORT = 3000) {
+  async startServer(PORT: number = 3000) {
     // Start the webhook server and save reference to the server
     // Call the startServer function with "call" method to bind "this" which is the current instance of the WebhookBot
     // This is because onUpdate functions needs a "this" binding that is a instance of the Bot Class,
@@ -49,7 +49,7 @@ class WebhookBot extends Bot {
    * @param {String} url HTTPS URL to send updates to, options.path or bot token will be appended to path.
    * @param {Object} [options={}] Options object for registering the API, refer to telegram API reference
    */
-  async setWebhook(url, options = {}) {
+  async setWebhook(url: string, options: { path?: string } = {}) {
     // Validate url and ensure it is https first
     try {
       const urlObject = new URL(url);
@@ -88,7 +88,7 @@ class WebhookBot extends Bot {
    * @todo Maybe add a try catch or smth?
    * @todo Add a return value perhaps?
    */
-  async setWebhookAndStartServer(url, options, port) {
+  async setWebhookAndStartServer(url: string, options = {}, port: number) {
     // Start server first before setting up webhook integration with telegram API to ensure
     // server is up and running before telegram API attempts to send any updates.
     await this.startServer(port);
@@ -97,11 +97,11 @@ class WebhookBot extends Bot {
 
   /**
    * @param {Object} [options={}] Reference: https://core.telegram.org/bots/api#deletewebhook
-   * @return {boolean} Boolean returned to determine if webhook is successfully removed
+   * @return Boolean returned to determine if webhook is successfully removed
    *
    * @todo Get webhook info to ensure webhook is properly removed
    */
-  async deleteWebhook(options = {}) {
+  async deleteWebhook(options: Object = {}): Promise<boolean> {
     // Remove webhook to ensure telegram stop sending updates to this webhook server
     return this.tapi("deleteWebhook", options);
   }
@@ -141,10 +141,8 @@ class WebhookBot extends Bot {
    *
    * @todo Auto call this using a process.onExit / onError handler
    */
-  async stopServerAndRemoveWebhook(options) {
+  async stopServerAndRemoveWebhook(options: Object) {
     await this.deleteWebhook(options);
     await this.stopServer();
   }
 }
-
-module.exports = WebhookBot;
