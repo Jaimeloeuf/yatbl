@@ -5,14 +5,14 @@
  * @return {object} Returns an object with all the individual module exports in that directory
  *
  * @todo Should not import itself
- * @todo Support list of files to ignore
  */
-module.exports = function exportAllModulesInDir(
-  dirname = __dirname,
-  ignore = []
-) {
+export default function exportAllModulesInDir(
+  dirname: string = __dirname
+  // @todo Support list of files to ignore
+  // ignore = []
+): object {
   const files = require("fs").readdirSync(dirname);
-  const moduleList = {};
+  const moduleList: { [s: string]: any } = {};
   const jsExt = /.js$/i;
 
   // console.log("files", files);
@@ -21,11 +21,11 @@ module.exports = function exportAllModulesInDir(
   for (const filename of files)
     if (jsExt.test(filename) && filename !== "index.js") {
       // Remove the extension when attaching to the object
-      const filenameWoExt = filename.slice(0, filename.length - 3);
+      const filenameWoExt: string = filename.slice(0, filename.length - 3);
       moduleList[filenameWoExt] = require(dirname + "/" + filenameWoExt);
     }
 
   // console.log(moduleList);
 
   return moduleList;
-};
+}
