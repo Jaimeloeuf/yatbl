@@ -1,4 +1,5 @@
 /**
+ * @todo Is this really still needed?
  * This is a getter method, so use it like "this.message.text"
  * Get the message/update received in a nicer manner allowing you to do simpler checks
  * @example
@@ -9,7 +10,7 @@
  * @todo Can explore something like the Knex query builder pattern
  * @todo add left+enter chat
  */
-function getMessage() {
+export default function getMessage() {
   return {
     text: this.update.message.text,
     photo: this.update.message.photo,
@@ -17,5 +18,3 @@ function getMessage() {
     sticker: this.update.message.sticker,
   };
 }
-
-module.exports = getMessage;

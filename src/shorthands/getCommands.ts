@@ -7,8 +7,9 @@
  * @todo treats everything behind the command as arguments for that command
  * @todo Make this into something like a getter, so handlers can just, this.commands
  * @todo Perhaps allow this method to test for commands, like this.commands("start") // returns bool + arguements
+ * @todo Convert the whole thing into a ternary expression?
  */
-function getCommands() {
+export default function getCommands() {
   if (this.update.message && this.update.message.entities)
     return (
       this.update.message.entities
@@ -25,5 +26,3 @@ function getCommands() {
     );
   else return [];
 }
-
-module.exports = getCommands;

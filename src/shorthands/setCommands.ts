@@ -6,7 +6,11 @@
  * @param {object} [options={ merge: true }] Options, merge is default to true, where new commands is appended to existing commands rather than overwriting existing commands
  * @returns {object} Refer to https://core.telegram.org/bots/api#setmycommands
  */
-async function setCommands(tapi, commands = [], options = { merge: true }) {
+export default async function setCommands(
+  tapi,
+  commands: Array<any> = [],
+  options = { merge: true }
+) {
   // Merge existing commands and new commands into new array before setting commands if user did not leave commands empty
   if (commands.length && options.merge) {
     const response = await tapi("getMyCommands");
@@ -14,7 +18,9 @@ async function setCommands(tapi, commands = [], options = { merge: true }) {
     else throw new Error("Failed to get existing commands");
   }
 
+  // Always filters out duplicate commands and warn user about them
+  // NO, allow override as a default option
+  // commands = [...new Set(commands.map((obj) => obj.command))];
+
   return tapi("setMyCommands", { commands });
 }
-
-module.exports = setCommands;
