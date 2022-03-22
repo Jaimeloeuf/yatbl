@@ -1,23 +1,29 @@
-const tapiFF = require("./tapiFF");
-const onUpdate = require("./onUpdate");
+import tapiFF from "./tapiFF";
+import onUpdate from "./onUpdate";
+
+type ApiErrorHandler = (error: any) => void;
+type ShortHand = Function;
+type ShortHandArg = ShortHand | Array<ShortHand> | object | Array<object>;
+type Handler = Function;
+type Callback = Function;
 
 /**
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
  */
-class Bot {
+export default class Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   tapi;
   _onUpdate = onUpdate;
-  apiErrorHandler = console.error; // Default error handler is just error logging
-  handlers = []; // On update handler functions
+  apiErrorHandler: ApiErrorHandler = console.error; // Default error handler is just error logging
+  handlers: Array<Handler> = []; // On update handler functions
   _BOT_TOKEN = "";
-  _shortHands = []; // shortHand methods
+  _shortHands: Array<ShortHand> = []; // shortHand methods
 
   /**
    * @param {String} BOT_TOKEN Telegram Bot token from bot father
    * @param {Object} configurations Used to configure the bot, changing the default configs
    */
-  constructor(BOT_TOKEN, configurations = {}) {
+  constructor(BOT_TOKEN: string, configurations: object = {}) {
     this.changeToken(BOT_TOKEN);
   }
 
@@ -28,7 +34,7 @@ class Bot {
    * The primary use case for this would be for the constructor and when a new bot token for the same bot has been requested from bot father.
    * @param {*} NEW_BOT_TOKEN Bot token provided by bot father from telegram
    */
-  changeToken(NEW_BOT_TOKEN) {
+  changeToken(NEW_BOT_TOKEN: string) {
     if (!NEW_BOT_TOKEN || NEW_BOT_TOKEN === "")
       throw new Error("Bot token required!");
 
@@ -43,7 +49,7 @@ class Bot {
    * Function to allow you to register a custom error handler
    * @param {*} apiErrorHandler Error handler called with error object on error from telegram API
    */
-  registerApiErrorHandler(apiErrorHandler) {
+  registerApiErrorHandler(apiErrorHandler: ApiErrorHandler) {
     this.apiErrorHandler = apiErrorHandler;
   }
 
@@ -51,7 +57,7 @@ class Bot {
    * Add new shorthand method(s) to bind onto "this" of new update callback handlers
    * @param {(Function | Array<Function> | object | Array<object>)} shortHand method(s)
    */
-  addShortHand(shortHand) {
+  addShortHand(shortHand: ShortHandArg) {
     // Foreach has an arrow function to not pass this._addShortHand the optional parameters for a forEach handler
     if (Array.isArray(shortHand))
       return shortHand.forEach((shortHand) => this._addShortHand(shortHand));
@@ -62,7 +68,7 @@ class Bot {
    * Inner method for adding new shorthand method(s) to bind onto "this" of new update callback handlers
    * @param {(Function | object)} shortHand method(s)
    */
-  _addShortHand(shortHand) {
+  _addShortHand(shortHand: ShortHandArg) {
     // If shortHand is a function, do nothing
     // Modify name of function if name is given. Primarily to change names to prevent naming conflicts
     // Function is conditionally imported for faster load time when no renaming is needed
@@ -97,7 +103,7 @@ class Bot {
    * @param {String} nameToCheck Name of the function to check. Name can be accessed using "Function.name"
    * @returns {Boolean} Whether the name is already registered or not. To be handled by callee
    */
-  checkShortHandConflicts(nameToCheck) {
+  checkShortHandConflicts(nameToCheck: string): boolean {
     return this._shortHands
       .map((shortHand) => shortHand.name) // Transform array of functions to array of function names
       .includes(nameToCheck);
@@ -108,7 +114,7 @@ class Bot {
    * @param {function} newHandler handler function to call with update object on new update
    * @return {Number} Number of handlers registered on this bot
    */
-  addHandler(newHandler) {
+  addHandler(newHandler: Handler): number {
     return this.handlers.push(newHandler);
   }
 
@@ -117,7 +123,7 @@ class Bot {
    * @param {function} callback Callback function that will be called with the update object
    * @return {Number} Number of handlers registered on this bot
    */
-  onAllCommands(callback) {
+  onAllCommands(callback: Callback): number {
     const getCommands = require("./shorthands/getCommands"); // Only load shortHand if this method is used
     // Alternatively -->  () => getCommands().length ? await callback(update) : undefined
     // Alternatively -->  () => getCommands().length && await callback(update)
@@ -137,7 +143,7 @@ class Bot {
    * @param {function} callback Callback function that will be called with the update object
    * @return {Number} Number of handlers registered on this bot
    */
-  onCommand(command, callback) {
+  onCommand(command: string, callback: Callback): number {
     const getCommand = require("./shorthands/getCommand"); // Only load shortHand if this method is used
     // Using function instead of arrow function to prevent inheriting the "this" value binding, of the object's method.
     // Instead, we want the "this" binding that is passed in via the onUpdate method
@@ -153,7 +159,7 @@ class Bot {
    * Wrapper over addHandler method to set callbacks for updates that are ONLY messages, and no command type updates
    * @param {Function} callback function to be used as the handler for this type of updates
    */
-  onMessage(callback) {
+  onMessage(callback: Callback): number {
     const noCommands = require("./shorthands/noCommands"); // Only load shortHand if this method is used
     // Using function instead of arrow function to prevent inheriting the "this" value binding, of the object's method.
     // Instead, we want the "this" binding that is passed in via the onUpdate method
@@ -168,5 +174,3 @@ class Bot {
     // });
   }
 }
-
-module.exports = Bot;
