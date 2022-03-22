@@ -1,4 +1,8 @@
-const config = require("./config");
+import type Bot from "./bot";
+
+interface Context {
+  [index: string]: Function;
+}
 
 /**
  * Create context object to bind as "this" of update handlers
@@ -9,8 +13,9 @@ const config = require("./config");
  * @param {Array<Function>} shortHands the array of shortHand functions
  * @returns {object} "this" ctx for handlers
  */
-function createShortHands(ctxForShortHands, shortHands) {
-  const ctx = {};
+function createShortHands(ctxForShortHands, shortHands: Array<Function>) {
+  // if (!shortHands) return {}; // This will only happen if the this is not binded properly
+  const ctx: Context = {};
   for (const shortHand of shortHands)
     ctx[shortHand.name] = shortHand.bind(ctxForShortHands);
   return ctx;
@@ -25,7 +30,7 @@ function createShortHands(ctxForShortHands, shortHands) {
  *
  * @todo Add a try/catch when calling all the handlers to allow a individual handler to error out. Should other handlers still be ran? Ran with an error binded to "this"?
  */
-module.exports = async function _onUpdate(updates) {
+export default async function _onUpdate(this: Bot, updates) {
   // Loop through every single update
   for (const update of updates) {
     // Create the context object for each update
@@ -38,4 +43,4 @@ module.exports = async function _onUpdate(updates) {
     // Using forEach ensures every handler is called 1 by 1, without blocking the loop through every single update
     this.handlers.forEach((handler) => handler.call(ctx, update));
   }
-};
+}
