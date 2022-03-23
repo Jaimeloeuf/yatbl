@@ -1,11 +1,11 @@
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
 /**
  * tapi (telegram API) Factory Function
  * @param {String} BOT_TOKEN Telegram bot token, the base telegram API url will be generated with this
  * @returns {Function} The tapi function
  */
-module.exports = function tapiFF(BOT_TOKEN) {
+export default function tapiFF(BOT_TOKEN: string): Function {
   if (!BOT_TOKEN) throw new Error("Missing BOT_TOKEN");
 
   const baseUrl = `https://api.telegram.org/bot${BOT_TOKEN}/`;
@@ -15,7 +15,7 @@ module.exports = function tapiFF(BOT_TOKEN) {
    * @param {string} tApiMethod Telegram API method found on https://core.telegram.org/bots/api#available-methods
    * @param {object} body Request body for the API
    */
-  async function tapi(tApiMethod, body) {
+  async function tapi(tApiMethod: string, body: object = {}) {
     const res = await fetch(baseUrl + tApiMethod, {
       method: "POST",
       // @todo Should include content-length headers
@@ -28,4 +28,4 @@ module.exports = function tapiFF(BOT_TOKEN) {
   }
 
   return tapi;
-};
+}
