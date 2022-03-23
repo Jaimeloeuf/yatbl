@@ -1,13 +1,15 @@
 import tapiFF from "./tapiFF";
 import onUpdate from "./onUpdate";
 
-type ApiErrorHandler = (error: any) => void;
-type ShortHand = Function;
-type ShortHandArg = ShortHand | Array<ShortHand> | object | Array<object>;
-type Handler = Function;
-type Callback = Function;
-
-import type { tapi_T } from "./types/yatbl";
+import type {
+  tapi_T,
+  ApiErrorHandler,
+  ShortHand,
+  ShortHandConfig,
+  ShortHandArg,
+  Handler,
+  Callback,
+} from "./types/yatbl";
 
 /**
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
@@ -57,40 +59,39 @@ export default class Bot {
 
   /**
    * Add new shorthand method(s) to bind onto "this" of new update callback handlers
-   * @param {(Function | Array<Function> | object | Array<object>)} shortHand method(s)
    */
   addShortHand(shortHand: ShortHandArg) {
     // Foreach has an arrow function to not pass this._addShortHand the optional parameters for a forEach handler
-    if (Array.isArray(shortHand))
-      return shortHand.forEach((shortHand) => this._addShortHand(shortHand));
+    if (Array.isArray(shortHand)) return shortHand.forEach(this._addShortHand);
     else return this._addShortHand(shortHand);
   }
 
   /**
    * Inner method for adding new shorthand method(s) to bind onto "this" of new update callback handlers
-   * @param {(Function | object)} shortHand method(s)
    */
-  _addShortHand(shortHand: ShortHandArg) {
-    // If shortHand is a function, do nothing
-    // Modify name of function if name is given. Primarily to change names to prevent naming conflicts
-    // Function is conditionally imported for faster load time when no renaming is needed
-    // Else if object with only shortHand, just assign function to the variable
-    // Else the configuration object is invalid.
-    if (typeof shortHand === "function");
-    else if (
-      typeof shortHand === "object" &&
-      typeof shortHand.name === "string"
-    )
+  _addShortHand(shortHand: ShortHand | ShortHandConfig) {
+    /** Type predicate to test if shortHandArg is a configuration object */
+    const isShortHandConfig = (
+      v: any
+    ): v is { name: string; shortHand: ShortHand } =>
+      typeof v === "object" &&
+      typeof v?.name === "string" &&
+      typeof v?.shortHand === "function";
+
+    if (typeof shortHand === "function") {
+      // If shortHand is a function, do nothing
+      // Need this empty one so we do not go to the else clause and cause an Error thrown
+    } else if (isShortHandConfig(shortHand))
+      // Modify name of function if name is given. Primarily to change names to prevent naming conflicts
+      // Util function is conditionally imported for faster load time when no renaming is needed
       shortHand = require("./utils/renameFunction")(
         shortHand.name,
         shortHand.shortHand
-      );
-    else if (typeof shortHand.shortHand === "function")
-      shortHand = shortHand.shortHand;
+      ) as ShortHand;
     else throw new Error("Invalid short hand configuration object used!");
 
-    // Check if the name is taken and warn the user if so.
-    // Note: users can just ignore this and override previous shortHand that used the same name if needed
+    // Ensure all shortHand names are unique
+    // *Note!!! users can just ignore this and override previous shortHand that used the same name if needed
     if (this.checkShortHandConflicts(shortHand.name))
       console.warn(
         `Function name ${shortHand.name} is taken. Please rename it or else this will override the previous shortHand added`
