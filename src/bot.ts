@@ -110,6 +110,9 @@ export default class Bot {
     return this._shortHands
       .map((shortHand) => shortHand.name) // Transform array of functions to array of function names
       .includes(nameToCheck);
+
+    // Alternative, however this does not return a boolean
+    // return this._shortHands.find((shortHand) => shortHand.name === nameToCheck)
   }
 
   /**

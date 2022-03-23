@@ -1,4 +1,5 @@
 import type Bot from "./bot";
+import type { Update } from "telegram-typings";
 
 interface Context {
   [index: string]: Function;
@@ -30,7 +31,7 @@ function createShortHands(ctxForShortHands, shortHands: Array<Function>) {
  *
  * @todo Add a try/catch when calling all the handlers to allow a individual handler to error out. Should other handlers still be ran? Ran with an error binded to "this"?
  */
-export default async function _onUpdate(this: Bot, updates) {
+export default async function _onUpdate(this: Bot, updates: Array<Update>) {
   // Loop through every single update
   for (const update of updates) {
     // Create the context object for each update

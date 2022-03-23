@@ -12,6 +12,7 @@ export type ShortHandArg =
   | ShortHandConfig
   | Array<ShortHandConfig>;
 
-export type Handler = Function;
+import type { Update } from "telegram-typings";
+export type Handler = (update: Update) => any;
 
 export type Callback = Function;
