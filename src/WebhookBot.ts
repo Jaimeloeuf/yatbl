@@ -84,11 +84,8 @@ export class WebhookBot extends Bot {
    * Refer to the setWebhook and startServer methods for more details.
    * This function just wraps over these 2 methods
    * The parameters are also the same as the 2 methods, refer to them for more details.
-   *
-   * @todo Maybe add a try catch or smth?
-   * @todo Add a return value perhaps?
    */
-  async setWebhookAndStartServer(url: string, options = {}, port: number) {
+  async setWebhookAndStartServer(url: string, options = {}, port?: number) {
     // Start server first before setting up webhook integration with telegram API to ensure
     // server is up and running before telegram API attempts to send any updates.
     await this.startServer(port);
@@ -108,9 +105,9 @@ export class WebhookBot extends Bot {
 
   /**
    * Only run this method to stop server after deleting webhook integration config with telegram method using the 'deleteWebhook' method
-   * @return {boolean} Boolean returned to indicate if server is successfully stopped
+   * @return Boolean returned to indicate if server is successfully stopped
    */
-  async stopServer() {
+  async stopServer(): Promise<boolean> {
     try {
       // Close server once all current updates have been processed
       // Wrapped in a Promise to use async/await to run it sequentially and use within a try/catch block
@@ -136,12 +133,11 @@ export class WebhookBot extends Bot {
   }
 
   /**
-   * Wrapper method over deleteWebhook and stopServer methods to make it easier for users to call them in order
+   * Wrapper method over deleteWebhook and stopServer methods to make it easier for users to run them in the correct order
    * Refer to deleteWebhook for parameters, as params are directly passed to that method
-   *
-   * @todo Auto call this using a process.onExit / onError handler
    */
   async stopServerAndRemoveWebhook(options: Object) {
+    // Delete webhook first before stopping server to ensure no more requests will be sent in
     await this.deleteWebhook(options);
     await this.stopServer();
   }
