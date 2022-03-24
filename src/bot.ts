@@ -1,4 +1,4 @@
-import tapiFF from "./tapiFF";
+import { tapiFF } from "./tapiFF";
 import onUpdate from "./onUpdate";
 
 import type {
@@ -14,7 +14,7 @@ import type {
 /**
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
  */
-export default class Bot {
+export class Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   tapi?: tapi_T;
   _onUpdate = onUpdate;

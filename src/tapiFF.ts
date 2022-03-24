@@ -7,7 +7,7 @@ import type { tapi_T } from "./types/yatbl";
  * @param {String} BOT_TOKEN Telegram bot token, the base telegram API url will be generated with this
  * @returns {Function} The tapi function
  */
-export default function tapiFF(BOT_TOKEN: string): tapi_T {
+export function tapiFF(BOT_TOKEN: string): tapi_T {
   if (!BOT_TOKEN) throw new Error("Missing BOT_TOKEN");
 
   const baseUrl = `https://api.telegram.org/bot${BOT_TOKEN}/`;

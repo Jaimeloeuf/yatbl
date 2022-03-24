@@ -3,10 +3,10 @@
  * @todo startServer and setWebhook should be "seperate" methods as users might want to use builtin method to set webhook, but want to run their own webhook server.
  */
 
-import Bot from "./bot";
+import { Bot } from "./bot";
 import startServer from "./server";
 
-export default class WebhookBot extends Bot {
+export class WebhookBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   _webhookServer; // Reference to the integrated webhook server
 

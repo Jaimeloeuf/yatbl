@@ -1,7 +1,7 @@
-import Bot from "./bot";
+import { Bot } from "./bot";
 import sleep from "./sleep";
 
-export default class PollingBot extends Bot {
+export class PollingBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   _update_id = 0; // Set _update_id (used for polling) to start at 0 and use snake case to match tel API response
   _continueLooping = false; // Bool to determine if looping should continue
