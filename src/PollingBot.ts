@@ -24,9 +24,8 @@ export default class PollingBot extends Bot {
    * @notice Even if pollingInterval is set to something really small, it will not poll telegram API every single millisecond or whatever, because pollingInterval is the time between EACH call to the API
    * @notice Which means that you can pass in 0 as the interval to poll without any interval or delay between the getUpdates
    *
-   * @todo Implement restart calls. Instead of re-creating everything, check if there is a polling loop already first.
-   *
-   * @todo
+   * @todos
+   * - Implement restart calls. Instead of re-creating everything, check if there is a polling loop already first.
    * - Perhaps the fix for the issue where messages get skipped, is to stop using "dont care loops",
    * - meaning, we should only make the nxt API call, once the first polling is completed
    * - Or an easier way is just to await the polling method call.
@@ -34,15 +33,15 @@ export default class PollingBot extends Bot {
   async startPolling(pollingInterval: number = 200) {
     // Delete webhook before using getUpdates to prevent conflicts https://core.telegram.org/bots/api#deletewebhook
     // This is ran to completion before flag setting to ensure looping does not start before webhook config with telegram API is deleted.
-    await this.tapi("deleteWebhook");
+    await this.tapi!("deleteWebhook");
 
     // Set continue looping flag
     this._continueLooping = true;
 
-    // Function to poll the telegram API for updates
+    // Function to poll telegram API for updates
     // Arrow function to keep "this" binding
-    const polling = async () => {
-      const update = await this.tapi("getUpdates", {
+    const poll = async () => {
+      const update = await this.tapi!("getUpdates", {
         offset: ++this._update_id,
       });
 
@@ -55,13 +54,16 @@ export default class PollingBot extends Bot {
       // Update this._update_id when there is one and use the latest update_id from update response
       this._update_id = update.result[update.result.length - 1].update_id;
 
+      // Only avail after Node 16.6.0 will use this once v18 becomes active LTS
+      // this._update_id = update.result(-1).update_id;
+
       this._onUpdate(update.result);
     };
 
     // Mimics setInterval, but only looping again after the current loop is completed
     while (this._continueLooping) {
       // Call this first to ensure it starts the first poll on startPolling and not after the first interval
-      await polling();
+      await poll();
 
       // @todo introduce back pressure control by increasing polling interval
       if (pollingInterval) await sleep(pollingInterval); // Only sleep/timeout/delay if a pollingInterval is specified
