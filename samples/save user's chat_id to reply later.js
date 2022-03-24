@@ -4,7 +4,7 @@
 
 require("dotenv").config();
 
-const { PollingBot } = require("../src");
+const { PollingBot } = require("../dist");
 const bot = new PollingBot(process.env.BOT_TOKEN);
 
 bot.addHandler(function (update) {

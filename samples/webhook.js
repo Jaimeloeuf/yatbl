@@ -4,7 +4,7 @@
 
 require("dotenv").config();
 
-const { WebhookBot, shortHands } = require("../src");
+const { WebhookBot, shortHands } = require("../dist");
 const bot = new WebhookBot(process.env.BOT_TOKEN);
 
 bot.addShortHand(shortHands.replyMessage);

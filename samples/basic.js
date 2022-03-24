@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const Bot = require("../src/bot");
+const Bot = require("../dist/bot");
 const bot = new Bot(process.env.BOT_TOKEN);
 
 bot.addHandler(async function (update) {
