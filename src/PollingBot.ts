@@ -42,7 +42,7 @@ export class PollingBot extends Bot {
     // Arrow function to keep "this" binding
     const poll = async () => {
       const update = await this.tapi!("getUpdates", {
-        offset: ++this._update_id,
+        offset: this._update_id,
       });
 
       // On telegram API failure
@@ -51,11 +51,11 @@ export class PollingBot extends Bot {
       // If no updates, end this function
       if (!update.result || !update.result.length) return;
 
-      // Update this._update_id when there is one and use the latest update_id from update response
-      this._update_id = update.result[update.result.length - 1].update_id;
+      // Update this._update_id to the update_id of the next update
+      this._update_id = update.result[update.result.length - 1].update_id + 1;
 
       // Only avail after Node 16.6.0 will use this once v18 becomes active LTS
-      // this._update_id = update.result(-1).update_id;
+      // this._update_id = update.result(-1).update_id + 1;
 
       this._onUpdate(update.result);
     };
