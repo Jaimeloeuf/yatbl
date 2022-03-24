@@ -6,7 +6,7 @@
  * @param {object} [options={ merge: true }] Options, merge is default to true, where new commands is appended to existing commands rather than overwriting existing commands
  * @returns {object} Refer to https://core.telegram.org/bots/api#setmycommands
  */
-export default async function setCommands(
+export async function setCommands(
   tapi,
   commands: Array<any> = [],
   options = { merge: true }

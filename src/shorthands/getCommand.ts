@@ -6,7 +6,7 @@
  * Reference used for parser https://core.telegram.org/bots/api#messageentity
  * @param {String} command Command to find and parse when found
  */
-export default function getCommand(command: string) {
+export function getCommand(command: string) {
   // Explicitly end and return undefined if the update does not contain a message or if the message have not entities
   if (
     !this.update.message ||

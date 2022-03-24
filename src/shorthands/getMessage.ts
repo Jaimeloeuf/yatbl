@@ -10,7 +10,7 @@
  * @todo Can explore something like the Knex query builder pattern
  * @todo add left+enter chat
  */
-export default function getMessage() {
+export function getMessage() {
   return {
     text: this.update.message.text,
     photo: this.update.message.photo,

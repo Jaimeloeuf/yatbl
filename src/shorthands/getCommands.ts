@@ -9,7 +9,7 @@
  * @todo Perhaps allow this method to test for commands, like this.commands("start") // returns bool + arguements
  * @todo Convert the whole thing into a ternary expression?
  */
-export default function getCommands() {
+export function getCommands() {
   if (this.update.message && this.update.message.entities)
     return (
       this.update.message.entities

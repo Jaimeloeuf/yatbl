@@ -1,3 +1,8 @@
-// Load all modules in this dir and export them
-import exporter from "../utils/exportAllModulesInDir";
-export default exporter(__dirname);
+// Rexport all shorthands from this dir
+export * from "./replyMessage";
+export * from "./defaultShortHands";
+export * from "./getCommand";
+export * from "./getCommands";
+export * from "./noCommands";
+export * from "./setCommands";
+export * from "./getMessage";
