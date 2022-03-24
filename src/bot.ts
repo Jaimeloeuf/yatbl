@@ -62,8 +62,14 @@ export class Bot {
    */
   addShortHand(shortHand: ShortHandArg) {
     // Foreach has an arrow function to not pass this._addShortHand the optional parameters for a forEach handler
-    if (Array.isArray(shortHand)) return shortHand.forEach(this._addShortHand);
+    if (Array.isArray(shortHand))
+      return shortHand.forEach((shortHand) => this._addShortHand(shortHand));
     else return this._addShortHand(shortHand);
+
+    // Note that this alternative does not work
+    // Because when called like this, the method will be treated as a function and lose its `this` binding
+    // Which makes `this` accessed within _addShortHand to be undefined
+    // if (Array.isArray(shortHand)) return shortHand.forEach(this._addShortHand);
   }
 
   /**
