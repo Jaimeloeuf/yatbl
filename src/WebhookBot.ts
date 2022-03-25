@@ -4,9 +4,9 @@
  */
 
 import { Bot } from "./bot";
-import startServer from "./server";
+import server from "./server";
 
-import type { SetWebhook } from "telegram-typings";
+import type { SetWebhook, DeleteWebhook } from "telegram-typings";
 type WebhookConfig = Omit<SetWebhook, "url">;
 
 export class WebhookBot extends Bot {
@@ -87,12 +87,10 @@ export class WebhookBot extends Bot {
   }
 
   /**
-   * @param {Object} [options={}] Reference: https://core.telegram.org/bots/api#deletewebhook
-   * @return Boolean returned to determine if webhook is successfully removed
-   *
    * @todo Get webhook info to ensure webhook is properly removed
+   * @return Boolean returned to determine if webhook is successfully removed
    */
-  async deleteWebhook(options: Object = {}): Promise<boolean> {
+  async deleteWebhook(options: DeleteWebhook = {}): Promise<boolean> {
     // Remove webhook to ensure telegram stop sending updates to this webhook server
     return this.tapi("deleteWebhook", options);
   }
