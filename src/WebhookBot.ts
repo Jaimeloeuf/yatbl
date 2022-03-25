@@ -9,9 +9,11 @@ import server from "./server";
 import type { SetWebhook, DeleteWebhook } from "telegram-typings";
 type WebhookConfig = Omit<SetWebhook, "url">;
 
+import type { Server } from "http";
+
 export class WebhookBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
-  _webhookServer; // Reference to the integrated webhook server
+  _webhookServer?: Server; // Reference to the integrated webhook server
 
   /**
    * @param {String} BOT_TOKEN Telegram Bot token from bot father
