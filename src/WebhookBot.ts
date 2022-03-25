@@ -6,6 +6,9 @@
 import { Bot } from "./bot";
 import startServer from "./server";
 
+import type { SetWebhook } from "telegram-typings";
+type WebhookConfig = Omit<SetWebhook, "url">;
+
 export class WebhookBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
   _webhookServer; // Reference to the integrated webhook server
@@ -45,38 +48,31 @@ export class WebhookBot extends Bot {
   /**
    * Set/Register webhook URL with telegram server. Run this only after server is started and ready for incoming updates.
    * Reference: https://core.telegram.org/bots/api#setwebhook
-   * @note Default url path follows telegram API standard of using bot token as the base API url, but allow user to override using options.path
-   * @param {String} url HTTPS URL to send updates to, options.path or bot token will be appended to path.
-   * @param {Object} [options={}] Options object for registering the API, refer to telegram API reference
+   * @param {String} url HTTPS URL to send updates to, by default the path is the bot token.
    */
-  async setWebhook(url: string, options: { path?: string } = {}) {
-    // Validate url and ensure it is https first
-    try {
-      const urlObject = new URL(url);
-      if (urlObject.protocol !== "https:") throw new Error();
-    } catch (_) {
-      // Catch and re-throw with specific error message
-      throw new Error(
-        "Invalid Webhook URL! See 'https://core.telegram.org/bots/api#setwebhook'"
-      );
-    }
+  async setWebhook(url: string, webhookConfig: WebhookConfig = {}) {
+    const urlObject = new URL(url);
 
-    // Get webhook url path, either from options or following telegram's recommendations, use the bot token (set on object by the constructor)
-    const urlPath = options.path || this._BOT_TOKEN;
-    // If path is specified in options, delete before spreading options object onto setWebhook API call request body
-    if (options.path) delete options.path;
+    if (urlObject.protocol !== "https:")
+      throw new Error("Only HTTPS URLs allowed for webhooks");
+
+    // If no path name is set on the URL path, auto set path here by
+    // following telegram's recommendations to use bot token (set on object by the constructor) as path
+    // Setting path name will auto have / pre-pended to it
+    if (urlObject.pathname === "/") urlObject.pathname = this._BOT_TOKEN;
 
     // Call setWebhook API and get back the response to check if the setup was successful
-    const setWebhookResponse = await this.tapi("setWebhook", {
-      // also can we read the hostname of the server and figure out the domain name? then add the path to the back?
-      url: url + urlPath,
-      ...options,
+    const setWebhookResponse = await this.tapi!("setWebhook", {
+      // Get the URL constructed above
+      url: urlObject.toString(),
+
+      ...webhookConfig,
     });
 
     // Throw error from telegram if webhook setup failed.
     if (!setWebhookResponse.ok) throw new Error(setWebhookResponse.description);
 
-    console.log("Webhook successfully set to: ", url + urlPath);
+    console.log("Webhook successfully set to: ", urlObject.toString());
   }
 
   /**
