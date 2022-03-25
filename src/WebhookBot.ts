@@ -112,32 +112,26 @@ export class WebhookBot extends Bot {
   }
 
   /**
-   * Only run this method to stop server after deleting webhook integration config with telegram method using the 'deleteWebhook' method
-   * @return Boolean returned to indicate if server is successfully stopped
+   * Only run this method to stop server after deleting webhook integration config with telegram method using the 'deleteWebhook' method.
+   * Once this method resolves, it means server successfully stopped, if it throws means it failed to stop the webhook server.
    */
-  async stopServer(): Promise<boolean> {
-    try {
-      // Close server once all current updates have been processed
-      // Wrapped in a Promise to use async/await to run it sequentially and use within a try/catch block
-      // Check if server is created and set on instance because if startServer fails,
-      // and process.on("uncaughtException") catches it, then we dont want to call "close" on undefined
-      if (this._webhookServer)
-        await new Promise((resolve, reject) =>
-          this._webhookServer.close((err) => (err ? reject(err) : resolve()))
-        );
+  async stopServer(): Promise<void> {
+    return new Promise((resolve, reject) =>
+      this._webhookServer
+        ? this._webhookServer.close((err) => {
+            if (err) {
+              console.error("Failed to stop internal webhook server\n", err);
+              return reject(err);
+            }
 
-      // Alternative to promise wrapping code above using native util.promisify method
-      // This is the more official way to do it, but contains more unneccessary code without any value.
-      // const closeServer = require("util").promisify(this._webhookServer.close);
-      // await closeServer();
+            // Remove reference of webhook server from instance once it is stopped
+            delete this._webhookServer;
 
-      console.log("Internal webhook server closed");
-      return true;
-    } catch (error) {
-      console.error("Failed to close internal webhook server");
-      console.error(error);
-      return false;
-    }
+            console.log("Internal webhook server stopped");
+            resolve();
+          })
+        : reject(new Error("There is no webhook server to stop"))
+    );
   }
 
   /**
