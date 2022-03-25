@@ -13,6 +13,7 @@ import type { Server } from "http";
 
 export class WebhookBot extends Bot {
   // Instance variables. Most are defined here more for documentation purposes than anything.
+  _urlObject?: URL; // Reference to a URL object if user used setWebhook to set a webhook URL
   _webhookServer?: Server; // Reference to the integrated webhook server
 
   /**
@@ -24,22 +25,27 @@ export class WebhookBot extends Bot {
   }
 
   /**
-   * Start a webhook server and Set/Register webhook URL with telegram server
-   * @note Any errors thrown in 'startServer' function will be bubbled up
-   * @note Default url follows telegram API standard of using the base API url where bot token is used, but allow user to override using options
-   * @param {Number} [PORT=3000] The port on localhost for the server to listen to.
+   * Start a webhook server (HTTP POST server), that does not handle HTTPS
+   *
+   * @param PORT The port on localhost for the server to listen to.
    * Defaults to 3000 assuming bot server does not handle HTTPS directly, rather traffic is routed from a reverse proxy.
    * Since the built in webhook server will not handle HTTPS, and node is not exactly good at it,
    * it is recommended to set webhook to a reverse proxy, and have the traffic routed to this.
    * Doing this also allows multiple bots to share the same domain and port, with just different URL paths.
+   *
+   * @param path Set the webhook url's path for server to listen to.
+   * If URL object exists, means user set a new webhook URL, then use the path name for server's path.
+   * Else if no URL object exists and user did not pass a path in,
+   * assume user is using BOT_TOKEN as the webhook URL's path as recommended by telegram.
+   * Else if user passes in a path, that will be the path used for server's path
    */
-  async startServer(PORT: number = 3000) {
+  async startServer(PORT: number = 3000, path: string = "/" + this._BOT_TOKEN) {
     // Start the webhook server and save its reference on an instance variable
     // Start server with current instance of this WebhookBot because `onUpdate` needs an instance of Bot Class as its "this" binding
     this._webhookServer = server(
       this,
       PORT,
-      "/" + this._BOT_TOKEN,
+      this._urlObject ? this._urlObject.pathname : path,
       this._onUpdate,
       this.apiErrorHandler
     );
@@ -72,6 +78,9 @@ export class WebhookBot extends Bot {
     // Throw error from telegram if webhook setup failed.
     if (!setWebhookResponse.ok) throw new Error(setWebhookResponse.description);
 
+    // Set url object onto the reference so that it can be used by startServer method to set server's path
+    this._urlObject = urlObject;
+
     console.log("Webhook successfully set to: ", urlObject.toString());
   }
 
@@ -81,11 +90,16 @@ export class WebhookBot extends Bot {
    * This function just wraps over these 2 methods
    * The parameters are also the same as the 2 methods, refer to them for more details.
    */
-  async setWebhookAndStartServer(url: string, options = {}, port?: number) {
+  async startServerAndSetWebhook(
+    url: string,
+    webhookConfig?: WebhookConfig,
+    port?: number,
+    path?: string
+  ) {
     // Start server first before setting up webhook integration with telegram API to ensure
     // server is up and running before telegram API attempts to send any updates.
-    await this.startServer(port);
-    await this.setWebhook(url, options);
+    await this.startServer(port, path);
+    await this.setWebhook(url, webhookConfig);
   }
 
   /**
@@ -130,7 +144,7 @@ export class WebhookBot extends Bot {
    * Wrapper method over deleteWebhook and stopServer methods to make it easier for users to run them in the correct order
    * Refer to deleteWebhook for parameters, as params are directly passed to that method
    */
-  async stopServerAndRemoveWebhook(options: Object) {
+  async deleteWebhookAndStopServer(options: Object) {
     // Delete webhook first before stopping server to ensure no more requests will be sent in
     await this.deleteWebhook(options);
     await this.stopServer();
