@@ -2,20 +2,10 @@ import { Bot } from "./bot";
 import sleep from "./sleep";
 
 export class PollingBot extends Bot {
-  // Instance variables. Most are defined here more for documentation purposes than anything.
+  /* Instance variables. Most are defined here more for documentation purposes than anything. */
   _update_id = 0; // Set _update_id (used for polling) to start at 0 and use snake case to match tel API response
   _continueLooping = false; // Bool to determine if looping should continue
   asyncUpdateCounter = 0;
-
-  /**
-   * @param {String} BOT_TOKEN Telegram Bot token from bot father
-   * @param {Object} configurations Used to configure the bot, changing the default configs
-   *
-   * @todo Annotate the configurations type, either here or in Bot class
-   */
-  constructor(BOT_TOKEN: string, configurations: object = {}) {
-    super(BOT_TOKEN, configurations);
-  }
 
   /**
    * Start polling
@@ -70,9 +60,7 @@ export class PollingBot extends Bot {
     }
   }
 
-  /**
-   * Stop polling but keep configurations.
-   */
+  /** Stop polling but keep configurations. */
   stopPolling() {
     this._continueLooping = false;
   }

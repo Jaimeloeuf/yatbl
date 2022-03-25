@@ -12,17 +12,9 @@ type WebhookConfig = Omit<SetWebhook, "url">;
 import type { Server } from "http";
 
 export class WebhookBot extends Bot {
-  // Instance variables. Most are defined here more for documentation purposes than anything.
+  /* Instance variables. Most are defined here more for documentation purposes than anything. */
   _urlObject?: URL; // Reference to a URL object if user used setWebhook to set a webhook URL
   _webhookServer?: Server; // Reference to the integrated webhook server
-
-  /**
-   * @param {String} BOT_TOKEN Telegram Bot token from bot father
-   * @param {Object} configurations Used to configure the bot, changing the default configs
-   */
-  constructor(BOT_TOKEN: string, configurations: object = {}) {
-    super(BOT_TOKEN, configurations);
-  }
 
   /**
    * Start a webhook server (HTTP POST server), that does not handle HTTPS

@@ -15,7 +15,7 @@ import type {
  * @todo Back pressure adjustment support to pause polling/webhook or lower polling freq to prevent OOM death
  */
 export class Bot {
-  // Instance variables. Most are defined here more for documentation purposes than anything.
+  /* Instance variables. Most are defined here more for documentation purposes than anything. */
   tapi?: tapi_T;
   _onUpdate = onUpdate;
   apiErrorHandler: ApiErrorHandler = console.error; // Default error handler is just error logging
@@ -25,9 +25,8 @@ export class Bot {
 
   /**
    * @param {String} BOT_TOKEN Telegram Bot token from bot father
-   * @param {Object} configurations Used to configure the bot, changing the default configs
    */
-  constructor(BOT_TOKEN: string, configurations: object = {}) {
+  constructor(BOT_TOKEN: string) {
     this.changeToken(BOT_TOKEN);
   }
 
