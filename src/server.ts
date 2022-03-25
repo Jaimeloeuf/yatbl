@@ -1,91 +1,72 @@
-/**
- * https://github.com/lukeed/polkadot/blob/master/examples/with-middleware/index.js
- */
+import type { Bot } from "./bot";
+import http from "http";
 
-import polkadot from "polkadot";
-import { json } from "body-parser";
+/** Function to create and start a server instance */
+export default (
+  // Although bot passed in is webhookbot by default when users use this library's webhook bot,
+  // the bot is only used for calling onUpdate in this function, which means that by right,
+  // since onUpdate is binded on Bot class type, this type can be widened to be `Bot`.
+  // Which will make it easier for users who want to use this server, but implement their own webhook bot class,
+  // as they wont have to conform to the methods/class-type of our webhook bot to use this server.
+  bot: Bot,
 
-/**
- * Used to loop over all middlewares and call them 1 by 1
- * https://github.com/lukeed/polkadot/blob/master/examples/with-middleware/util.js
- * @param {*} mws The array of middleware functions
- * @param {*} req HTTP Req object
- * @param {*} res HTTP Res object
- */
-async function loop(mws, req, res) {
-  let out;
-  for (const fn of mws) {
-    out =
-      (await fn(req, res, (err) => {
-        if (err) throw err; // next accepts error that will get thrown
-      })) || out;
-  }
-  return out;
-}
-
-/**
- * Function to start the server by wrapping over polkadot server starting
- * @notice "this" is expected to be passed in for this function to re-bind it to onUpdate function which REQUIRES it to be a instance of the Bot class.
- * @param {Number} PORT
- * @param {String} path The bot token should be passed in to follow telegram API standard of using bot token as the base API url, else any secret string will do too.
- * @param {Function} onUpdate
- * @param {Function} apiErrorHandler
- */
-export default function startServer(
   PORT: number,
   path: string,
   onUpdate: Function,
   apiErrorHandler: Function
-) {
-  path = "/" + path;
+) =>
+  http
+    .createServer(
+      // Using arrow function to keep `this` binding of startServer function
+      async (req, res): Promise<any> => {
+        try {
+          // Only handle update if both path and method matches exactly
+          if (req.url === path && req.method === "POST") {
+            // Get the POST request body, which is an Update object
+            const update = await new Promise((resolve, reject) => {
+              const chunks: Array<Uint8Array> = [];
+              req
+                .on("data", (chunk) => chunks.push(chunk))
+                .on("end", () =>
+                  resolve(JSON.parse(Buffer.concat(chunks).toString()))
+                )
+                .on("error", reject);
+            });
 
-  // @todo Only log it in debug/verbose mode
-  console.log("Webhook server listening to: ", path);
+            // Unlike getUpdates telegram API
+            // 1. Every webhook invocation / HTTP POST message coming in, will only receive ONE update at a time
+            //    Although telegram can make multiple simultaneous POST requests to your bot, each request only ONE update object
+            //    This is why update object is put in an array, since onUpdate always expects an array of update(s)
+            // 2. This is not a response so there is no 'ok' field in the request body from telegram
+            //
+            // References:
+            // https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates
+            // https://core.telegram.org/bots/api#setwebhook
+            // https://core.telegram.org/bots/api#getupdates
+            await onUpdate.call(bot, [update]);
 
-  // Arrow function passed in to keep "this" binding of startServer function
-  return polkadot(async (req, res) => {
-    try {
-      // Only execute middlewares if path and method matches exactly
-      if (req.path === path && req.method === "POST")
-        return loop(
-          [
-            json(), // Parse request body and put it on req.body
+            // Set header to indicate response type as JSON
+            // res.setHeader("Content-Type", "application/json");
+            res.writeHead(200);
+            res.end();
+          } else {
+            // If route is invalid, we assume it is not telegram that called our API
+            // Thus return 404 and dont respond to any updates sent
+            res.writeHead(404);
+            res.end();
+          }
+        } catch (error) {
+          console.error(error);
 
-            // Main request handler as a middleware
-            // Using an arrow function to keep the "this" binding of startServer function
-            (req, _) => {
-              // https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates
-              // Unlike using getUpdates, this is not a response so there is no 'ok' field in the request body from telegram
-              // Only a SINGLE update will be sent via webhook everytime.
+          // actual error handler instead of the normal api error handler
+          apiErrorHandler(error);
 
-              // Put update object in an array since onUpdate always expects an array of update(s)
-              // Call onUpdate with update object and bind the Bot instance to onUpdate's "this"
-              onUpdate.call(this, [req.body]);
-
-              // Rely on "@polka/send-type" internally with return
-              // @todo Integrate this with tapi!
-              return {};
-            },
-          ],
-          req,
-          res
-        );
-      else {
-        // If route is invalid, we assume it is not telegram that called our API
-        // Thus return 404 and dont respond to any updates sent
-        res.statusCode = 404;
-        res.end();
+          // Close the connection
+          res.writeHead(500);
+          res.end();
+        }
       }
-    } catch (error) {
-      console.error(error);
-      // this.errorHandler(error); // actual error handler instead of the normal api error handler
-
-      // Close the connection
-      res.statusCode = 400;
-      return error.message || error;
-    }
-  }).listen(PORT, (err) => {
-    if (err) throw err;
-    console.log(`Webhook server now running on localhost:${PORT}`);
-  });
-}
+    )
+    .listen(PORT, () =>
+      console.log(`Webhook server running on localhost:${PORT}`)
+    );

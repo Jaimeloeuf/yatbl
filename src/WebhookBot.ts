@@ -32,14 +32,12 @@ export class WebhookBot extends Bot {
    * Doing this also allows multiple bots to share the same domain and port, with just different URL paths.
    */
   async startServer(PORT: number = 3000) {
-    // Start the webhook server and save reference to the server
-    // Call the startServer function with "call" method to bind "this" which is the current instance of the WebhookBot
-    // This is because onUpdate functions needs a "this" binding that is a instance of the Bot Class,
-    // Thus we are passing the current instance to startServer, which will call onUpdate with this instance binded to "this"
-    this._webhookServer = startServer.call(
+    // Start the webhook server and save its reference on an instance variable
+    // Start server with current instance of this WebhookBot because `onUpdate` needs an instance of Bot Class as its "this" binding
+    this._webhookServer = server(
       this,
       PORT,
-      this._BOT_TOKEN,
+      "/" + this._BOT_TOKEN,
       this._onUpdate,
       this.apiErrorHandler
     );
