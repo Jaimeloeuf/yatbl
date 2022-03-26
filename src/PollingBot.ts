@@ -2,10 +2,11 @@ import { Bot } from "./bot";
 import sleep from "./sleep";
 
 export class PollingBot extends Bot {
-  /* Instance variables. Most are defined here more for documentation purposes than anything. */
-  _update_id = 0; // Set _update_id (used for polling) to start at 0 and use snake case to match tel API response
-  _continueLooping = false; // Bool to determine if looping should continue
-  asyncUpdateCounter = 0;
+  // Set #update_id (used for polling) to start at 0 and use snake case to match tel API response
+  #update_id = 0;
+
+  // Bool to determine if looping should continue
+  #continueLooping = false;
 
   /**
    * Start polling
@@ -26,13 +27,13 @@ export class PollingBot extends Bot {
     await this.tapi!("deleteWebhook");
 
     // Set continue looping flag
-    this._continueLooping = true;
+    this.#continueLooping = true;
 
     // Function to poll telegram API for updates
     // Arrow function to keep "this" binding
     const poll = async () => {
       const update = await this.tapi!("getUpdates", {
-        offset: this._update_id,
+        offset: this.#update_id,
       });
 
       // On telegram API failure
@@ -41,17 +42,17 @@ export class PollingBot extends Bot {
       // If no updates, end this function
       if (!update.result || !update.result.length) return;
 
-      // Update this._update_id to the update_id of the next update
-      this._update_id = update.result[update.result.length - 1].update_id + 1;
+      // Update this.#update_id to the update_id of the next update
+      this.#update_id = update.result[update.result.length - 1].update_id + 1;
 
       // Only avail after Node 16.6.0 will use this once v18 becomes active LTS
-      // this._update_id = update.result(-1).update_id + 1;
+      // this.#update_id = update.result(-1).update_id + 1;
 
       this._onUpdate(update.result);
     };
 
     // Mimics setInterval, but only looping again after the current loop is completed
-    while (this._continueLooping) {
+    while (this.#continueLooping) {
       // Call this first to ensure it starts the first poll on startPolling and not after the first interval
       await poll();
 
@@ -62,7 +63,7 @@ export class PollingBot extends Bot {
 
   /** Stop polling but keep configurations. */
   stopPolling() {
-    this._continueLooping = false;
+    this.#continueLooping = false;
   }
 
   /**
