@@ -12,9 +12,12 @@ type WebhookConfig = Omit<SetWebhook, "url">;
 import type { Server } from "http";
 
 export class WebhookBot extends Bot {
-  /* Instance variables. Most are defined here more for documentation purposes than anything. */
-  _urlObject?: URL; // Reference to a URL object if user used setWebhook to set a webhook URL
-  _webhookServer?: Server; // Reference to the integrated webhook server
+  // Reference to a URL object if user used setWebhook to set a webhook URL
+  #urlObject?: URL;
+
+  // Reference to the integrated webhook server
+  // Union type instead of optional type to be able to set this field to undefined later on
+  #webhookServer: Server | undefined;
 
   /**
    * Start a webhook server (HTTP POST server), that does not handle HTTPS
@@ -34,10 +37,10 @@ export class WebhookBot extends Bot {
   async startServer(PORT: number = 3000, path: string = "/" + this._BOT_TOKEN) {
     // Start the webhook server and save its reference on an instance variable
     // Start server with current instance of this WebhookBot because `onUpdate` needs an instance of Bot Class as its "this" binding
-    this._webhookServer = server(
+    this.#webhookServer = server(
       this,
       PORT,
-      this._urlObject ? this._urlObject.pathname : path,
+      this.#urlObject ? this.#urlObject.pathname : path,
       this._onUpdate,
       this.apiErrorHandler
     );
@@ -71,7 +74,7 @@ export class WebhookBot extends Bot {
     if (!setWebhookResponse.ok) throw new Error(setWebhookResponse.description);
 
     // Set url object onto the reference so that it can be used by startServer method to set server's path
-    this._urlObject = urlObject;
+    this.#urlObject = urlObject;
 
     console.log("Webhook successfully set to: ", urlObject.toString());
   }
@@ -109,15 +112,21 @@ export class WebhookBot extends Bot {
    */
   async stopServer(): Promise<void> {
     return new Promise((resolve, reject) =>
-      this._webhookServer
-        ? this._webhookServer.close((err) => {
+      this.#webhookServer
+        ? this.#webhookServer.close((err) => {
             if (err) {
               console.error("Failed to stop internal webhook server\n", err);
               return reject(err);
             }
 
             // Remove reference of webhook server from instance once it is stopped
-            delete this._webhookServer;
+            // However cannot delete using the delete operator as private class fields cannot be deleted
+            // delete this.#webhookServer;
+            //
+            // Thus instead of deleting it, setting it to undefined to lose the reference to the instance
+            // On the TS side, this means that annotating that field as optional does not work,
+            // Instead it has to be a union type with undefined.
+            this.#webhookServer = undefined;
 
             console.log("Internal webhook server stopped");
             resolve();
