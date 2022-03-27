@@ -37,7 +37,7 @@ export class PollingBot extends Bot {
       });
 
       // On telegram API failure
-      if (!update.ok) return this.apiErrorHandler(update);
+      if (!update.ok) return this._apiErrorHandler(update);
 
       // If no updates, end this function
       if (!update.result || !update.result.length) return;

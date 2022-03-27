@@ -1,4 +1,4 @@
-import type Bot from "./bot";
+import type { Bot } from "./bot";
 import type { Update } from "telegram-typings";
 
 interface Context {
@@ -42,6 +42,6 @@ export default async function _onUpdate(this: Bot, updates: Array<Update>) {
 
     // Loop through these handlers with shared ctx object binded to "this" and update as the arguement
     // Using forEach ensures every handler is called 1 by 1, without blocking the loop through every single update
-    this.handlers.forEach((handler) => handler.call(ctx, update));
+    this._handlers.forEach((handler) => handler.call(ctx, update));
   }
 }

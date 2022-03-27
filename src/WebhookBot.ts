@@ -42,7 +42,7 @@ export class WebhookBot extends Bot {
       PORT,
       this.#urlObject ? this.#urlObject.pathname : path,
       this._onUpdate,
-      this.apiErrorHandler
+      this._apiErrorHandler
     );
   }
 

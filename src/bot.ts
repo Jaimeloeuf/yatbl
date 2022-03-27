@@ -18,8 +18,8 @@ export class Bot {
   /* Instance variables. Most are defined here more for documentation purposes than anything. */
   tapi?: tapi_T;
   _onUpdate = onUpdate;
-  apiErrorHandler: ApiErrorHandler = console.error; // Default error handler is just error logging
-  handlers: Array<Handler> = []; // On update handler functions
+  _apiErrorHandler: ApiErrorHandler = console.error; // Default error handler is just error logging
+  _handlers: Array<Handler> = []; // On update handler functions
   _BOT_TOKEN = "";
   _shortHands: Array<ShortHand> = []; // shortHand methods
 
@@ -53,7 +53,7 @@ export class Bot {
    * @param {*} apiErrorHandler Error handler called with error object on error from telegram API
    */
   registerApiErrorHandler(apiErrorHandler: ApiErrorHandler) {
-    this.apiErrorHandler = apiErrorHandler;
+    this._apiErrorHandler = apiErrorHandler;
   }
 
   /**
@@ -126,7 +126,7 @@ export class Bot {
    * @return {Number} Number of handlers registered on this bot
    */
   addHandler(newHandler: Handler): number {
-    return this.handlers.push(newHandler);
+    return this._handlers.push(newHandler);
   }
 
   /**
