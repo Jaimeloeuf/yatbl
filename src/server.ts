@@ -1,19 +1,18 @@
 import type { Bot } from "./bot";
+import type { Update } from "telegram-typings";
 import { createServer } from "http";
 
 /** Function to create and start a server instance */
 export default (
   // Although bot passed in is webhookbot by default when users use this library's webhook bot,
-  // the bot is only used for calling onUpdate in this function, which means that by right,
-  // since onUpdate is binded on Bot class type, this type can be widened to be `Bot`.
+  // the bot is only used for calling `_onUpdate` and `_apiErrorHandler` in this function,
+  // which means that by right, since the values are binded on Bot class, this type can be widened to be `Bot`.
   // Which will make it easier for users who want to use this server, but implement their own webhook bot class,
   // as they wont have to conform to the methods/class-type of our webhook bot to use this server.
   bot: Bot,
 
   PORT: number,
-  path: string,
-  onUpdate: Function,
-  apiErrorHandler: Function
+  path: string
 ) =>
   createServer(
     // Using arrow function to keep `this` binding of startServer function
@@ -22,7 +21,7 @@ export default (
         // Only handle update if both path and method matches exactly
         if (req.url === path && req.method === "POST") {
           // Get the POST request body, which is an Update object
-          const update = await new Promise((resolve, reject) => {
+          const update: Update = await new Promise((resolve, reject) => {
             const chunks: Array<Uint8Array> = [];
             req
               .on("data", (chunk) => chunks.push(chunk))
@@ -42,7 +41,7 @@ export default (
           // https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates
           // https://core.telegram.org/bots/api#setwebhook
           // https://core.telegram.org/bots/api#getupdates
-          await onUpdate.call(bot, [update]);
+          await bot._onUpdate([update]);
 
           // Set header to indicate response type as JSON
           // res.setHeader("Content-Type", "application/json");
@@ -58,7 +57,7 @@ export default (
         console.error(error);
 
         // actual error handler instead of the normal api error handler
-        apiErrorHandler(error);
+        bot._apiErrorHandler(error);
 
         // Close the connection
         res.writeHead(500);
